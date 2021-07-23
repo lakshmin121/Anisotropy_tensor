@@ -2,6 +2,7 @@
 Functions for analysis of fibre orientation state in projected images of FRC.
 """
 import numpy as np
+from itertools import product, combinations
 
 
 def theo_orient_tensor_2D(phiDeg):
@@ -79,7 +80,6 @@ def orient_tensor_from_FTimage(wimgFT, coordsys='image'):
     kv = np.divide(vv, r)  # spatial frequency (unit vector component) in v-direction (y)
     E = np.sum(wimgFT)  # Total energy in Fourier space (sum of values at all points)
 
-    # elements of the orientation tensor
     Quu = np.sum(ku ** 2 * wimgFT) / E
     Quv = np.sum(ku * kv * wimgFT) / E
     Qvv = np.sum(kv ** 2 * wimgFT) / E
@@ -99,3 +99,69 @@ def orient_tensor_from_FTimage(wimgFT, coordsys='image'):
         return Q2, A2
     else:
         return Q, A
+
+
+def sanitize_2Dtensor(tensor):
+    if not type(tensor) == np.ndarray:
+        tensor = np.ndarray(tensor)
+    return tensor
+
+
+def delta(i, j):
+    if i==j:
+        return 1
+    else:
+        return 0
+
+
+def tensor2odf_2D(phivalsDeg, tensors):
+    if type(tensors) in (list, tuple):
+        A = sanitize_2Dtensor(tensors[0])
+    else:
+        A = sanitize_2Dtensor(tensors)
+    assert A.shape == (2, 2), 'Only two-dimensional tensors accepted'
+    phivals = np.deg2rad(phivalsDeg)
+    c = np.cos(phivals)
+    s = np.sin(phivals)
+    a = A.ravel()
+    afunc = a[0] * (c*c - 0.5) + a[1] * (c*s) + a[2] * (s*c) + a[3] * (s*s - 0.5)
+    odf = 1 / (2*np.pi) + (2 / np.pi) * afunc
+
+    if type(tensors) in (list, tuple):
+        if len(tensors) == 2:
+            A = sanitize_2Dtensor(tensors[1])
+        else:
+            print("tensors size not equal to 2. Returning second-order approximated ODF.")
+            return odf
+        assert A.shape == (4, 4), 'Only four-dimensional tensors accepted'
+        coords = [(0, 1)]
+        order = 4
+        base = tuple(coords * order)
+        indices = product(*base)
+
+        dircosine = np.array([c, s])
+        func = []
+        a = A.ravel()
+        # elements of basis function
+        for indx in indices:
+            elem = 1
+            for i in indx:
+                elem = elem * dircosine[i, :]
+            func.append(elem)
+
+        afunc = 0
+        for itrno, indx in enumerate(indices):
+            l = set(indx)
+            term1 = 0
+            term2 = 0
+            for comb in combinations(l, 2):
+                rem = tuple(l.difference(comb))
+                term1 += delta(*comb) * dircosine[rem[0]] * dircosine[rem[1]]
+                term2 += delta(*comb) * delta(*rem)
+
+            func[itrno] = func[itrno] - (term1 / 6) + (term2 / 24)
+            afunc = a[itrno] * func[itrno]
+
+        odf = odf + (8 / np.pi) * afunc
+
+    return odf

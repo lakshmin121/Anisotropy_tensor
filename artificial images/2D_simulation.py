@@ -41,6 +41,7 @@ for k in [0.1, 0.25, 0.5, 1, 5]:
     parameters = {'muDeg': m,
                   'kappa': k,
                   'spreadDeg': 180}
+    phiDomainDeg = (-90, 90)
 
     # simulated properties:
     df = int(np.ceil(fibdia * imscale))  # px
@@ -114,7 +115,7 @@ for k in [0.1, 0.25, 0.5, 1, 5]:
     fig = plt.figure()
     ax = fig.gca()
     myround = lambda x: int(round(x, 0))
-    phiBins = np.arange(myround(phiMin), myround(phiMax)+1, 10)
+    phiBins = np.arange(myround(phiDomainDeg[0]), myround(phiDomainDeg[1])+1, 10)
     hist, bins, _ = ax.hist(phivals, bins=phiBins, density=True)
     ax.set_xlim([phiBins[0], phiBins[-1]])
     ax.set_xticks(phiBins[::3])
@@ -134,7 +135,7 @@ for k in [0.1, 0.25, 0.5, 1, 5]:
     fig.savefig(path.join(outDir, probplot_fname), dpi=300)
 
     # Histogram data points to CSV
-    histDF = {'phiBins': bins, 'phiHist': np.append(hist, np.nan)}  # nan as last element to match lengths of bins and hist
+    histDF = {'phiBins': phiBins, 'phiHist': np.append(hist, np.nan)}  # nan as last element to match lengths of bins and hist
     histDF = pd.DataFrame(histDF)
     histDF.to_csv(path.join(outDir, prob_fname))
 

@@ -5,6 +5,12 @@ import numpy as np
 from itertools import product, combinations
 
 
+def delta(i, j):
+    if i==j:
+        return 1
+    else:
+        return 0
+
 def theo_orient_tensor_2D(phiDeg):
     ux = np.cos(np.deg2rad(phiDeg))
     uy = np.sin(np.deg2rad(phiDeg))
@@ -38,7 +44,8 @@ def orient_tensor_2D(prob_phi, phi_valsDeg):
 
     # check for total probability = 1
     d_phi = np.mean(phi_valsDeg[1:] - phi_valsDeg[:-1])  # mean bin width of phi values (delta_phi)
-    total_prob = np.sum(prob_phi) * d_phi
+    prob_phi = prob_phi * 180 / np.pi
+    total_prob = np.sum(prob_phi) * d_phi * np.pi / 180
     if not np.isclose(total_prob, 1.):
         print("Total probability not 1: {:1.2f}".format(total_prob))
 
@@ -65,6 +72,68 @@ def orient_tensor_2D(prob_phi, phi_valsDeg):
         print("Trace of anisotropy tensor not 0: {:1.2f}".format(tr))
 
     return orient_tensor, aniso_tensor
+
+
+def orientation_tensor_4order(prob_phi, phi_valsDeg):
+    if len(phi_valsDeg) == len(prob_phi) + 1:
+        phi_valsDeg = 0.5 * (phi_valsDeg[:-1] + phi_valsDeg[1:])
+    elif len(phi_valsDeg) == len(prob_phi):
+        pass
+    else:
+        raise ValueError("check dimensions of prob_phi and phi_vals")
+
+    # check for total probability = 1
+    d_phi = np.mean(phi_valsDeg[1:] - phi_valsDeg[:-1])  # mean bin width of phi values (delta_phi)
+    total_prob = np.sum(prob_phi) * d_phi
+
+    if not np.isclose(total_prob, 1.):
+        print("Total probability not 1: {:1.2f}".format(total_prob))
+    else:
+        print("Total probability: {:1.2f}".format(total_prob))
+
+    # direction cosines on 2D planea
+    u = np.zeros((2, len(phi_valsDeg)))
+    u[0, :] = np.cos(np.deg2rad(phi_valsDeg))
+    u[1, :] = np.sin(np.deg2rad(phi_valsDeg))
+
+    coords = [(0, 1)]
+    order = 4
+    base = tuple(coords * order)
+    indices = list(product(*base))
+
+    Q = []
+    # elements of the orientation tensor
+    for indx in indices:
+        elem = prob_phi
+        for i in indx:
+            elem = elem * u[i, :]
+        Q.append(np.sum(elem))
+
+    Q = np.array(Q).reshape((order, order))  # orientation tensor
+    print("Tr(Q): ", np.trace(Q))
+
+    # Anisotropy Tensor
+    Q2, A2 = orient_tensor_2D(prob_phi, phi_valsDeg)
+    print("Tr(Q2): ", np.trace(Q2))
+    A = Q.ravel()
+
+    for itrno, indx in enumerate(indices):
+        s = set(range(order))
+        term1 = 0
+        term2 = 0
+        counter = 0
+        for comb in combinations(s, 2):
+            i, j = tuple(indx[m] for m in comb)
+            k, l = tuple(indx[m] for m in s.difference(set(comb)))
+            term1 += delta(i, j) * Q2[k, l]
+            term2 += delta(i, j) * delta(k, l)
+            counter += 1
+        # print("counter: ", counter)
+        print("term1: ", term1)
+        print("term2: ", term2)
+        # A[itrno] = A[itrno] - (term1 / 6)  #+ (term2 / 48)
+    A = A.reshape(Q.shape)
+    return Q, A
 
 
 def orient_tensor_from_FTimage(wimgFT, coordsys='image'):
@@ -107,13 +176,6 @@ def sanitize_2Dtensor(tensor):
     return tensor
 
 
-def delta(i, j):
-    if i==j:
-        return 1
-    else:
-        return 0
-
-
 def tensor2odf_2D(phivalsDeg, tensors):
     if type(tensors) in (list, tuple):
         A = sanitize_2Dtensor(tensors[0])
@@ -125,6 +187,7 @@ def tensor2odf_2D(phivalsDeg, tensors):
     s = np.sin(phivals)
     a = A.ravel()
     afunc = a[0] * (c*c - 0.5) + a[1] * (c*s) + a[2] * (s*c) + a[3] * (s*s - 0.5)
+    # odf = 1 / (2*np.pi) + (2 / np.pi) * afunc
     odf = 1 / (2*np.pi) + (2 / np.pi) * afunc
 
     if type(tensors) in (list, tuple):

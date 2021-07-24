@@ -116,8 +116,8 @@ def fourier_orient_tensor_4order(image, windowName='hann'):
         term2 = 0
         for comb in combinations(l, 2):
             rem = tuple(l.difference(comb))
-            term1 += delta(*comb) * Q2[rem]
-            term2 += delta(*comb) * delta(*rem)
+            term1 += delta(comb) * Q2[rem]
+            term2 += delta(comb) * delta(*rem)
 
         A[itrno] = A[itrno] - (term1 / 6) + (term2 / 24)
     A = A.reshape(Q.shape)

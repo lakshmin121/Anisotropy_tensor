@@ -11,18 +11,10 @@ Challenges:
 """
 
 from os import path
-from glob import glob
 import numpy as np
 import pandas as pd
-from matplotlib_settings import *
 from matplotlib import pyplot as plt
 import skimage.io  as skio
-from skimage import img_as_float
-from skimage.transform import EuclideanTransform, warp
-import skimage.feature as skfeature
-from fiborient import orient_tensor_2D, theo_orient_tensor_2D
-from skimage.filters import window
-from scipy.fftpack import fft2, fftshift
 
 from fibfourier import fourier_orient_tensor_2order, fourier_orient_tensor_4order
 from fiborient import tensor2odf_2D

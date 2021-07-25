@@ -104,7 +104,7 @@ print("\nR: ")
 print(R)
 
 # transformation of orientation tensor for 90 degrees rotation.
-Q2 = R @ Q @ R.T  # Q is from Fourier space. Q2 is in original image.
+Q2 = R @ Q @ R.T  # Q is from Fourier space. Q2_theo is in original image.
 print("\nRQ'R':")
 print(Q2, ' trace: ', np.trace(Q2))
 

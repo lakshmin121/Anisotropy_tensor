@@ -29,12 +29,13 @@ def delta(i, j):
         return 0
 
 
-def fourier_orient_tensor_2order(image, windowName='hann'):
+def fourier_orient_tensor_2order(image, windowName=None):
     if image.ndim > 2:
         image = rgb2gray(image)
     image = img_as_float(image)
 
     # Fourier Transform
+
     wimg = image * window(windowName, image.shape)  # windowing the image
     wimgFT = np.abs(fftshift(fft2(wimg)))  # FT
 
@@ -62,21 +63,24 @@ def fourier_orient_tensor_2order(image, windowName='hann'):
     R = np.array([[0, -1], [1, 0]])
 
     # transformation of orientation tensor for 90 degrees rotation.
-    Q = R @ Q @ R.T  # Q is from Fourier space. Q2 is in original image.
+    Q = R @ Q @ R.T  # Q is from Fourier space. Q2_theo is in original image.
     A = Q - 0.5 * np.eye(2)
     return Q, A
 
 
-def fourier_orient_tensor_4order(image, windowName='hann'):
+def fourier_orient_tensor(image, windowName=None, order=2):
     if image.ndim > 2:
         image = rgb2gray(image)
     image = img_as_float(image)
 
     # Fourier Transform
-    wimg = image * window(windowName, image.shape)  # windowing the image
+    if windowName is not None:
+        wimg = image * window(windowName, image.shape)  # windowing the image
+    else:
+        wimg = image
     wimgFT = np.abs(fftshift(fft2(wimg)))  # FT
-    wimgFT = rotate(wimgFT, 90, order=3)  # rotating image to match orientation of FT space with real space
-
+    wimgFT = rotate(wimgFT, -90, order=3)  # rotating image to match orientation of FT space with real space
+    print("wimgFT min-max: ", np.min(wimgFT), np.max(wimgFT))
 
     # Calculation of orientation tensor in Fourier space:
     m, n = wimgFT.shape
@@ -91,35 +95,39 @@ def fourier_orient_tensor_4order(image, windowName='hann'):
     k[1, :, :] = np.divide(vv, r)  # spatial frequency (unit vector component) in v-direction (y)
     E = np.sum(wimgFT)  # Total energy in Fourier space (sum of values at all points)
 
-    coords = [(0, 1)]
-    order = 4
-    base = tuple(coords * order)
-    indices = product(*base)
+    # setup
+    coords = (0, 1)  # possible coordinates in 2D space
+    base = tuple([coords] * order)  # tensor space dimension = coords * order
+    indices = list(product(*base))  # all possible tensor indices Qijkl
 
+    # Orientation Tensor
     Q = []
-    # elements of the orientation tensor
     for indx in indices:
-        elem = wimgFT.copy()
+        elem = wimgFT.copy()  # elements of the orientation tensor
         for i in indx:
             elem = elem * k[i, :, :]
         Q.append(np.sum(elem))
-
     Q = np.array(Q).reshape((order, order)) / E  # orientation tensor in FT space
 
     # Anisotropy Tensor
-    Q2, A2 = fourier_orient_tensor_2order(image, windowName=windowName)
-    A = Q.ravel()
+    if order==2:
+        A = Q - 0.5 * np.eye(order)
 
-    for itrno, indx in enumerate(indices):
-        l = set(indx)
-        term1 = 0
-        term2 = 0
-        for comb in combinations(l, 2):
-            rem = tuple(l.difference(comb))
-            term1 += delta(comb) * Q2[rem]
-            term2 += delta(comb) * delta(*rem)
+    elif order==4:
+        Q2, A2 = fourier_orient_tensor(image, windowName=windowName, order=2)
+        A = np.copy(Q).ravel()
 
-        A[itrno] = A[itrno] - (term1 / 6) + (term2 / 24)
-    A = A.reshape(Q.shape)
+        for itrno, indx in enumerate(indices):
+            s = set(range(4))
+            term1 = 0
+            term2 = 0
+            for comb in combinations(s, 2):
+                i, j = tuple(indx[m] for m in comb)
+                k, l = tuple(indx[m] for m in s.difference(set(comb)))
+                # print("i, j, k, l: ", i, j, k, l)
+                term1 += delta(i, j) * Q2[k, l]
+                term2 += delta(i, j) * delta(k, l)
+            A[itrno] = A[itrno] - (term1 / 6) + (term2 / 48)
+        A = A.reshape(Q.shape)
 
     return Q, A

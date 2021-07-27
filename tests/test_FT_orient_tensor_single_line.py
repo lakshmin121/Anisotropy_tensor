@@ -36,12 +36,10 @@ with open(path.join(outDir, txt_fname), 'w+') as f:
         Q_theo = theo_orient_tensor_2D(rot)
         A_theo = Q_theo - 0.5 * np.eye(2)
         # FT orientation tensor
-        Q_FT, A = fourier_orient_tensor_2order(imgRottd, windowName='hann')
-        A = np.sqrt(2) * A
-        R = np.array([[0, -1], [1, 0]])
-        A = R @ A @ R.T
+        Q_FT, A = fourier_orient_tensor(imgRottd, windowName='hann', order=2)
         print("Tr(Q_FT): ", np.trace(Q_FT))
-        Q_FT = Q_FT / np.trace(Q_FT)
+        print("Det(A) = ", np.linalg.det(A))
+        # Q_FT = Q_FT / np.trace(Q_FT)
         # Error
         errQ = np.linalg.norm(Q_FT - Q_theo)
         errA = np.linalg.norm(A - A_theo)

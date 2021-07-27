@@ -44,7 +44,6 @@ def orient_tensor_2D(prob_phi, phi_valsDeg, order=2):
 
     # check for total probability = 1
     d_phi = np.mean(phi_valsDeg[1:] - phi_valsDeg[:-1])  # mean bin width of phi values (delta_phi)
-    # prob_phi = prob_phi * 180 / np.pi
     total_prob = np.sum(prob_phi) * d_phi
     if not np.isclose(total_prob, 1.):
         print("Total probability not 1: {:1.2f}".format(total_prob))

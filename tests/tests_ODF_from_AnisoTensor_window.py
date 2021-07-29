@@ -10,7 +10,6 @@ import sys
 import numpy as np
 import pandas as pd
 sys.path.append("../artificial images/")
-import orientation_probabilities as op
 import skimage.io as skio
 from fiborient import tensor2odf_2D, orient_tensor_2D
 from fibfourier import fourier_orient_tensor, localised_fourier_orient_tensor

@@ -16,7 +16,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 import skimage.io  as skio
 
-from fibfourier import fourier_orient_tensor_2order, fourier_orient_tensor_4order
+from fibfourier import fourier_orient_tensor_2order, fourier_orient_tensor
 from fiborient import tensor2odf_2D
 
 dataDir = "../data/test_images_2D/vf20p"
@@ -37,7 +37,7 @@ for k in [0.1, 0.25, 0.5, 1, 5]:
     print(dphi)
 
     Q2, A2 = fourier_orient_tensor_2order(img, 'hann')
-    Q4, A4 = fourier_orient_tensor_4order(img, 'hann')
+    Q4, A4 = fourier_orient_tensor(img, 'hann', order=4)
     phiVals = np.arange(phiBins[0], phiBins[-1], 2)
     phiODF = tensor2odf_2D(phiVals, (A2, A4))
 

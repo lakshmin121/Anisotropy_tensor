@@ -5,21 +5,19 @@ Implementation of functions for FT analysis of 2D FRC images.
 22nd July 2021
 """
 
+import time
 import numpy as np
-# from matplotlib_settings import *
-# from matplotlib import pyplot as plt
-# import skimage.io as skio
 from skimage import img_as_float
 from skimage.color import rgb2gray
-from skimage.transform import rotate  # EuclideanTransform, warp,
-# import skimage.feature as skfeature
-# from fiborient import orient_tensor_2D, theo_orient_tensor_2D
+from skimage.transform import rotate
+import multiprocessing
+from joblib import Parallel, delayed
 from skimage.filters import window
 from scipy.fftpack import fft2, fftshift
 from itertools import product, combinations
 
 
-__version__ = '0.1'
+__version__ = '0.2'
 
 
 def delta(i, j):
@@ -27,6 +25,109 @@ def delta(i, j):
         return 1
     else:
         return 0
+
+
+def sliding_window(img, x_width, y_width, x_step=1, y_step=1):
+    """
+    Returns an iterator containing the location and image captured by a sliding window.
+    :param img: original image across which the window has to slide.
+    :param x_width: width of sliding window in x-direction.
+    :param y_width: width of sliding window in y-direction.
+    :param x_step: distance by which window slides in x-direction.
+    :param y_step: distance by which window slides in y-direction.
+    :return: x, y, sub-image captured by the sliding window,
+    where x, y are location (centre) of the sliding window.
+    """
+    m, n = img.shape    # size of original image
+    x0 = x_width // 2   # border thickness = 1/2 of window width
+    y0 = y_width // 2
+
+    img_bordered = np.zeros((m + x_width, n + y_width))  # image with border
+    img_bordered[x0:x0+m, y0:y0+n] = img  # central region of bordered image = original image.
+    # currently border region is black (zero values).
+
+    # Border boundary condition = reflection
+    img_bordered[0:x0, :] = img_bordered[x0:2*x0, :][::-1, :]               # Left border
+    img_bordered[m+x0:m+2*x0, :]    = img_bordered[m:m+x0, :][::-1, :]      # right border
+    img_bordered[:, 0:y0]           = img_bordered[:, y0:2*y0][:, ::-1]     # bottom border
+    img_bordered[:, n+y0:n + 2*y0]  = img_bordered[:, n:n + y0][:, ::-1]    # top border
+
+    # ########################################### WRONG ###########################################
+    # for x in range(x0, m+x0, x_step):  # x-coordinate of sliding window centre
+    #     for y in range(y0, n+y0, y_step):  # y-coordinate of sliding window centre
+    #         yield x-x0, y-y0, img_bordered[x:x + x_width, y:y + y_width]
+    # ########################################### #### ###########################################
+    for x in range(0, m, x_step):  # x-coordinate of sliding window centre
+        for y in range(0, n, y_step):  # y-coordinate of sliding window centre
+            yield x, y, img_bordered[x:x + x_width, y:y + y_width]
+
+
+def localised_fourier_orient_tensor(img, x_width, y_width, x_step=1, y_step=1, windowName=None, order=2):
+    """
+    Evaluates a function applied to a sub-image selected by a sliding window,
+    repeated by sliding across the entire image.
+    :param func: function to be applied
+    :param img: input image
+    :param x_width: width of sliding window in x-direction
+    :param y_width: width of sliding window in y-direction
+    :param x_step: distance by which window slides in x-direction.
+    :param y_step: distance by which window slides in y-direction.
+    :param apply_median_filter: whether to smooth the output using a median filter.
+    :return: ndarray (image) resulting from operation of func on img.
+    """
+    def func2(XYwindow):
+        x, y, window = XYwindow
+        return fourier_orient_tensor(window, windowName=windowName, order=order)
+
+    parallelStart = time.time()
+    num_cores = multiprocessing.cpu_count() - 1
+    processed_list = Parallel(n_jobs=num_cores, prefer='threads')(delayed(func2)(xywindow)
+                                                                  for xywindow in sliding_window(img,
+                                                                                                 x_width,
+                                                                                                 y_width,
+                                                                                                 x_step,
+                                                                                                 y_step)
+                                                                  )
+    print("Parallel operation: elapsed time: ", time.time() - parallelStart)
+
+    opStart = time.time()
+    # print(len(processed_list))
+    Qitems = [item[0] for item in processed_list]
+    # Aitems = [item[1] for item in processed_list]
+    Q = np.dstack(Qitems)
+    # A = np.dstack(Aitems)
+    Q = np.nan_to_num(Q, nan=0)
+    Q = np.mean(Q, axis=-1)
+    Q = Q / np.trace(Q)
+    if order == 2:
+        A = Q - 0.5 * np.eye(order)
+    elif order == 4:
+        Q2, A2 = localised_fourier_orient_tensor(img,  x_width=x_width, y_width=y_width,
+                                                 x_step=x_step, y_step=y_step,
+                                                 windowName=windowName, order=2)
+        A = np.copy(Q).ravel()
+
+        # setup
+        coords = (0, 1)  # possible coordinates in 2D space
+        base = tuple([coords] * order)  # tensor space dimension = coords * order
+        indices = list(product(*base))  # all possible tensor indices Qijkl
+
+        for itrno, indx in enumerate(indices):
+            s = set(range(4))
+            term1 = 0
+            term2 = 0
+            for comb in combinations(s, 2):
+                i, j = tuple(indx[m] for m in comb)
+                k, l = tuple(indx[m] for m in s.difference(set(comb)))
+                # print("i, j, k, l: ", i, j, k, l)
+                term1 += delta(i, j) * Q2[k, l]
+                term2 += delta(i, j) * delta(k, l)
+            A[itrno] = A[itrno] - (term1 / 6) + (term2 / 48)
+        A = A.reshape(Q.shape)
+    else:
+        raise NotImplementedError
+    print("Local operation: elapsed time: ", time.time() - opStart)
+    return Q, A
 
 
 def fourier_orient_tensor_2order(image, windowName=None):

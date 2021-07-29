@@ -53,7 +53,7 @@ mpl.rcParams['font.size'] = 10.0
 mpl.rcParams['font.weight'] = 'normal'
 
 # AXES
-mpl.rcParams['axes.linewidth'] = 0.8
+mpl.rcParams['axes.linewidth'] = 0.5
 mpl.rcParams['axes.titlesize'] = 12.
 mpl.rcParams['axes.titleweight'] = 'bold'
 mpl.rcParams['axes.labelsize'] = 10.
@@ -85,7 +85,7 @@ mpl.rcParams['legend.borderpad'] = 0.3
 mpl.rcParams['legend.labelspacing'] = 0.5
 mpl.rcParams['legend.handlelength'] = 2.0
 mpl.rcParams['legend.handletextpad'] = 0.6
-mpl.rcParams['legend.columnspacing'] = 1.5
+mpl.rcParams['legend.columnspacing'] = 0.5
 
 # FIGURE
 mpl.rcParams['figure.titlesize'] = 12.

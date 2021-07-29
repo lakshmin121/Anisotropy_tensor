@@ -22,7 +22,7 @@ import pandas as pd
 m= 0
 for k in [0.1, 0.25, 0.5, 1, 5]:
     # INPUT
-    outDir = "../data/test_images_2D/vf20p"
+    outDir = "../data/test_images_2D/vf20_ar50_tk50"
     imgName = 'vm_m{0}k{1}'.format(m, k)
     img_fname = imgName + '.tiff'
     txt_fname = imgName + '.txt'

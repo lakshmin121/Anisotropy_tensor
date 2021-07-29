@@ -20,7 +20,7 @@ from matplotlib_settings import *
 
 # SET-UP
 Nf = 500  # number of fibres = number of phi values
-dataDir = "../data/test_images_2D/vf20p"
+dataDir = "../data/test_images_2D/vf20_ar50_tk50"
 outDir = "tests_odf_from_anisotensor"
 if not os.path.exists(outDir):
     os.mkdir(outDir)

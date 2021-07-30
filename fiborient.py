@@ -47,8 +47,8 @@ def orient_tensor_2D(prob_phi, phi_valsDeg, order=2):
     total_prob = np.sum(prob_phi) * d_phi
     if not np.isclose(total_prob, 1.):
         print("Total probability not 1: {:1.2f}".format(total_prob))
-    else:
-        print("Total probability: {:1.2f}".format(total_prob))
+    # else:
+    #     print("Total probability: {:1.2f}".format(total_prob))
 
     # setup
     coords = (0, 1)  # possible coordinates in 2D space

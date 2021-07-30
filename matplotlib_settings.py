@@ -13,7 +13,7 @@ import seaborn as sns
 
 # Figure widths
 fig_width_sml = 3.543  # in
-fig_wigth_med = 5.512  # in
+fig_width_med = 5.512  # in
 fig_width_lrg = 7.480  # in
 
 # aspect ratio

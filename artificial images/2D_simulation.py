@@ -111,7 +111,7 @@ for m in [0, 90]:
             :param image: Image in which fibres must be drawn.
             :param fibres: Iterable collection of fibres (objects of class Fibre).
             :param kind: 'line' or 'bezier'
-            :param cval: Image intensity value for fibre lines.
+            :param cval: Image intensity value (constant) for fibre lines.
             :type cval: int; value in the range 0-255.
             :param lineargs: additional kwargs to be used with 'bezier' curve.
             :return: image populated with fibres as lines of unit pixel thickness.
@@ -155,7 +155,6 @@ for m in [0, 90]:
 
         # Orientation Tensor
         Q, A = orient_tensor_2D(hist, bins)  # orientation and anisotropy tensors
-
 
 
         # DOCUMENTATION

@@ -1,0 +1,171 @@
+Rotation: 0 deg
+Theoretical orientation tensor:
+[[1. 0.]
+ [0. 0.]]
+FT orientation tensor:
+[[ 9.58450885e-01 -5.47918884e-17]
+ [-5.47918884e-17  7.28352483e-18]]
+L2-norm error: 0.04154911460503363
+
+Rotation: 5 deg
+Theoretical orientation tensor:
+[[0.99240388 0.08682409]
+ [0.08682409 0.00759612]]
+FT orientation tensor:
+[[ 0.72232056 -0.0282344 ]
+ [-0.0282344   0.25979887]]
+L2-norm error: 0.4037674234737921
+
+Rotation: 10 deg
+Theoretical orientation tensor:
+[[0.96984631 0.17101007]
+ [0.17101007 0.03015369]]
+FT orientation tensor:
+[[ 0.72428615 -0.06394164]
+ [-0.06394164  0.25777722]]
+L2-norm error: 0.47171694615883536
+
+Rotation: 15 deg
+Theoretical orientation tensor:
+[[0.9330127 0.25     ]
+ [0.25      0.0669873]]
+FT orientation tensor:
+[[ 0.6858572  -0.09794251]
+ [-0.09794251  0.2977259 ]]
+L2-norm error: 0.5970377872795691
+
+Rotation: 20 deg
+Theoretical orientation tensor:
+[[0.88302222 0.3213938 ]
+ [0.3213938  0.11697778]]
+FT orientation tensor:
+[[ 0.66402875 -0.12638974]
+ [-0.12638974  0.32090656]]
+L2-norm error: 0.7004036630698602
+
+Rotation: 25 deg
+Theoretical orientation tensor:
+[[0.8213938  0.38302222]
+ [0.38302222 0.1786062 ]]
+FT orientation tensor:
+[[ 0.63370516 -0.14643616]
+ [-0.14643616  0.35285725]]
+L2-norm error: 0.7913550530756365
+
+Rotation: 30 deg
+Theoretical orientation tensor:
+[[0.75      0.4330127]
+ [0.4330127 0.25     ]]
+FT orientation tensor:
+[[ 0.5979904  -0.17184486]
+ [-0.17184486  0.39038043]]
+L2-norm error: 0.8800675649573365
+
+Rotation: 35 deg
+Theoretical orientation tensor:
+[[0.67101007 0.46984631]
+ [0.46984631 0.32898993]]
+FT orientation tensor:
+[[ 0.56883823 -0.18812873]
+ [-0.18812873  0.42126322]]
+L2-norm error: 0.9406464544541888
+
+Rotation: 40 deg
+Theoretical orientation tensor:
+[[0.58682409 0.49240388]
+ [0.49240388 0.41317591]]
+FT orientation tensor:
+[[ 0.53616654 -0.20260176]
+ [-0.20260176  0.45566719]]
+L2-norm error: 0.9851078004738069
+
+Rotation: 45 deg
+Theoretical orientation tensor:
+[[0.5 0.5]
+ [0.5 0.5]]
+FT orientation tensor:
+[[ 0.5004913  -0.21112781]
+ [-0.21112781  0.49299855]]
+L2-norm error: 1.0057110808366616
+
+Rotation: 50 deg
+Theoretical orientation tensor:
+[[0.41317591 0.49240388]
+ [0.49240388 0.58682409]]
+FT orientation tensor:
+[[ 0.46581345 -0.1974326 ]
+ [-0.1974326   0.52907259]]
+L2-norm error: 0.9787005064572355
+
+Rotation: 55 deg
+Theoretical orientation tensor:
+[[0.32898993 0.46984631]
+ [0.46984631 0.67101007]]
+FT orientation tensor:
+[[ 0.43456088 -0.17922309]
+ [-0.17922309  0.56161072]]
+L2-norm error: 0.9304276591321806
+
+Rotation: 60 deg
+Theoretical orientation tensor:
+[[0.25      0.4330127]
+ [0.4330127 0.75     ]]
+FT orientation tensor:
+[[ 0.40743826 -0.1607651 ]
+ [-0.1607651   0.589815  ]]
+L2-norm error: 0.8692469178917941
+
+Rotation: 65 deg
+Theoretical orientation tensor:
+[[0.1786062  0.38302222]
+ [0.38302222 0.8213938 ]]
+FT orientation tensor:
+[[ 0.37727033 -0.13435805]
+ [-0.13435805  0.62085458]]
+L2-norm error: 0.7842500352889553
+
+Rotation: 70 deg
+Theoretical orientation tensor:
+[[0.11697778 0.3213938 ]
+ [0.3213938  0.88302222]]
+FT orientation tensor:
+[[ 0.35119157 -0.11469038]
+ [-0.11469038  0.6476235 ]]
+L2-norm error: 0.7004337804334749
+
+Rotation: 75 deg
+Theoretical orientation tensor:
+[[0.0669873 0.25     ]
+ [0.25      0.9330127]]
+FT orientation tensor:
+[[ 0.33449667 -0.08832562]
+ [-0.08832562  0.6648556 ]]
+L2-norm error: 0.6102441744806463
+
+Rotation: 80 deg
+Theoretical orientation tensor:
+[[0.03015369 0.17101007]
+ [0.17101007 0.96984631]]
+FT orientation tensor:
+[[ 0.30187061 -0.05735937]
+ [-0.05735937  0.69783765]]
+L2-norm error: 0.502119510618618
+
+Rotation: 85 deg
+Theoretical orientation tensor:
+[[0.00759612 0.08682409]
+ [0.08682409 0.99240388]]
+FT orientation tensor:
+[[ 0.30809034 -0.02567323]
+ [-0.02567323  0.69183585]]
+L2-norm error: 0.45381626513291223
+
+Rotation: 90 deg
+Theoretical orientation tensor:
+[[3.74939946e-33 6.12323400e-17]
+ [6.12323400e-17 1.00000000e+00]]
+FT orientation tensor:
+[[1.21178697e-01 5.56026185e-04]
+ [5.56026185e-04 8.78821303e-01]]
+L2-norm error: 0.17137436043660895
+

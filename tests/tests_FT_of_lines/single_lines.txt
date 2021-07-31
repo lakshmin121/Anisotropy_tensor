@@ -1,0 +1,304 @@
+Rotation: 0 deg
+Theoretical orientation tensor:
+[[1. 0.]
+ [0. 0.]]
+FT orientation tensor:
+[[ 9.14537225e-01 -1.03365459e-16]
+ [-1.02873243e-16  6.52963447e-02]]
+L2-norm error: 0.10755230629797655
+Theoretical anisotropy tensor:
+[[ 0.5  0. ]
+ [ 0.  -0.5]]
+FT anisotropy tensor:
+[[ 4.14537225e-01 -1.03365459e-16]
+ [-1.02873243e-16 -4.34703655e-01]]
+L2-norm error: 0.10755230629797653
+
+Rotation: 5 deg
+Theoretical orientation tensor:
+[[0.99240388 0.08682409]
+ [0.08682409 0.00759612]]
+FT orientation tensor:
+[[ 0.88717887 -0.053823  ]
+ [-0.053823    0.09297383]]
+L2-norm error: 0.24067584042379656
+Theoretical anisotropy tensor:
+[[ 0.49240388  0.08682409]
+ [ 0.08682409 -0.49240388]]
+FT anisotropy tensor:
+[[ 0.38717887 -0.053823  ]
+ [-0.053823   -0.40702617]]
+L2-norm error: 0.24067584042379656
+
+Rotation: 10 deg
+Theoretical orientation tensor:
+[[0.96984631 0.17101007]
+ [0.17101007 0.03015369]]
+FT orientation tensor:
+[[ 0.85383327 -0.10747161]
+ [-0.10747161  0.12674183]]
+L2-norm error: 0.42177290772530696
+Theoretical anisotropy tensor:
+[[ 0.46984631  0.17101007]
+ [ 0.17101007 -0.46984631]]
+FT anisotropy tensor:
+[[ 0.35383327 -0.10747161]
+ [-0.10747161 -0.37325817]]
+L2-norm error: 0.42177290772530696
+
+Rotation: 15 deg
+Theoretical orientation tensor:
+[[0.9330127 0.25     ]
+ [0.25      0.0669873]]
+FT orientation tensor:
+[[ 0.81730371 -0.15982898]
+ [-0.15982898  0.16369888]]
+L2-norm error: 0.598883367539071
+Theoretical anisotropy tensor:
+[[ 0.4330127  0.25     ]
+ [ 0.25      -0.4330127]]
+FT anisotropy tensor:
+[[ 0.31730371 -0.15982898]
+ [-0.15982898 -0.33630112]]
+L2-norm error: 0.598883367539071
+
+Rotation: 20 deg
+Theoretical orientation tensor:
+[[0.88302222 0.3213938 ]
+ [0.3213938  0.11697778]]
+FT orientation tensor:
+[[ 0.77480666 -0.20960354]
+ [-0.20960354  0.20678925]]
+L2-norm error: 0.7639980864240565
+Theoretical anisotropy tensor:
+[[ 0.38302222  0.3213938 ]
+ [ 0.3213938  -0.38302222]]
+FT anisotropy tensor:
+[[ 0.27480666 -0.20960354]
+ [-0.20960354 -0.29321075]]
+L2-norm error: 0.7639980864240565
+
+Rotation: 25 deg
+Theoretical orientation tensor:
+[[0.8213938  0.38302222]
+ [0.38302222 0.1786062 ]]
+FT orientation tensor:
+[[ 0.7286826  -0.25142798]
+ [-0.25142798  0.25348284]]
+L2-norm error: 0.9051276077542165
+Theoretical anisotropy tensor:
+[[ 0.3213938   0.38302222]
+ [ 0.38302222 -0.3213938 ]]
+FT anisotropy tensor:
+[[ 0.2286826  -0.25142798]
+ [-0.25142798 -0.24651716]]
+L2-norm error: 0.9051276077542164
+
+Rotation: 30 deg
+Theoretical orientation tensor:
+[[0.75      0.4330127]
+ [0.4330127 0.25     ]]
+FT orientation tensor:
+[[ 0.67467037 -0.29275795]
+ [-0.29275795  0.30831316]]
+L2-norm error: 1.0308060203426028
+Theoretical anisotropy tensor:
+[[ 0.25       0.4330127]
+ [ 0.4330127 -0.25     ]]
+FT anisotropy tensor:
+[[ 0.17467037 -0.29275795]
+ [-0.29275795 -0.19168684]]
+L2-norm error: 1.0308060203426028
+
+Rotation: 35 deg
+Theoretical orientation tensor:
+[[0.67101007 0.46984631]
+ [0.46984631 0.32898993]]
+FT orientation tensor:
+[[ 0.61664867 -0.32469409]
+ [-0.32469409  0.36723616]]
+L2-norm error: 1.125613984867173
+Theoretical anisotropy tensor:
+[[ 0.17101007  0.46984631]
+ [ 0.46984631 -0.17101007]]
+FT anisotropy tensor:
+[[ 0.11664867 -0.32469409]
+ [-0.32469409 -0.13276384]]
+L2-norm error: 1.125613984867173
+
+Rotation: 40 deg
+Theoretical orientation tensor:
+[[0.58682409 0.49240388]
+ [0.49240388 0.41317591]]
+FT orientation tensor:
+[[ 0.55778831 -0.35665303]
+ [-0.35665303  0.42692533]]
+L2-norm error: 1.2011775014851056
+Theoretical anisotropy tensor:
+[[ 0.08682409  0.49240388]
+ [ 0.49240388 -0.08682409]]
+FT anisotropy tensor:
+[[ 0.05778831 -0.35665303]
+ [-0.35665303 -0.07307467]]
+L2-norm error: 1.2011775014851056
+
+Rotation: 45 deg
+Theoretical orientation tensor:
+[[0.5 0.5]
+ [0.5 0.5]]
+FT orientation tensor:
+[[ 0.4977392  -0.38478878]
+ [-0.38478878  0.48691299]]
+L2-norm error: 1.2513507727433013
+Theoretical anisotropy tensor:
+[[1.11022302e-16 5.00000000e-01]
+ [5.00000000e-01 1.11022302e-16]]
+FT anisotropy tensor:
+[[-0.0022608  -0.38478878]
+ [-0.38478878 -0.01308701]]
+L2-norm error: 1.2513507727433013
+
+Rotation: 50 deg
+Theoretical orientation tensor:
+[[0.41317591 0.49240388]
+ [0.49240388 0.58682409]]
+FT orientation tensor:
+[[ 0.43904274 -0.35061245]
+ [-0.35061245  0.54731539]]
+L2-norm error: 1.1931400040175395
+Theoretical anisotropy tensor:
+[[-0.08682409  0.49240388]
+ [ 0.49240388  0.08682409]]
+FT anisotropy tensor:
+[[-0.06095726 -0.35061245]
+ [-0.35061245  0.04731539]]
+L2-norm error: 1.1931400040175395
+
+Rotation: 55 deg
+Theoretical orientation tensor:
+[[0.32898993 0.46984631]
+ [0.46984631 0.67101007]]
+FT orientation tensor:
+[[ 0.38330631 -0.31326852]
+ [-0.31326852  0.60381498]]
+L2-norm error: 1.1108569285788894
+Theoretical anisotropy tensor:
+[[-0.17101007  0.46984631]
+ [ 0.46984631  0.17101007]]
+FT anisotropy tensor:
+[[-0.11669369 -0.31326852]
+ [-0.31326852  0.10381498]]
+L2-norm error: 1.1108569285788894
+
+Rotation: 60 deg
+Theoretical orientation tensor:
+[[0.25      0.4330127]
+ [0.4330127 0.75     ]]
+FT orientation tensor:
+[[ 0.33006329 -0.27724766]
+ [-0.27724766  0.65767763]]
+L2-norm error: 1.0118661525002945
+Theoretical anisotropy tensor:
+[[-0.25       0.4330127]
+ [ 0.4330127  0.25     ]]
+FT anisotropy tensor:
+[[-0.16993671 -0.27724766]
+ [-0.27724766  0.15767763]]
+L2-norm error: 1.0118661525002945
+
+Rotation: 65 deg
+Theoretical orientation tensor:
+[[0.1786062  0.38302222]
+ [0.38302222 0.8213938 ]]
+FT orientation tensor:
+[[ 0.28202967 -0.23384951]
+ [-0.23384951  0.70627146]]
+L2-norm error: 0.886008479748158
+Theoretical anisotropy tensor:
+[[-0.3213938   0.38302222]
+ [ 0.38302222  0.3213938 ]]
+FT anisotropy tensor:
+[[-0.21797033 -0.23384951]
+ [-0.23384951  0.20627146]]
+L2-norm error: 0.886008479748158
+
+Rotation: 70 deg
+Theoretical orientation tensor:
+[[0.11697778 0.3213938 ]
+ [0.3213938  0.88302222]]
+FT orientation tensor:
+[[ 0.24204706 -0.19203684]
+ [-0.19203684  0.74682114]]
+L2-norm error: 0.7492763992620122
+Theoretical anisotropy tensor:
+[[-0.38302222  0.3213938 ]
+ [ 0.3213938   0.38302222]]
+FT anisotropy tensor:
+[[-0.25795294 -0.19203684]
+ [-0.19203684  0.24682114]]
+L2-norm error: 0.7492763992620122
+
+Rotation: 75 deg
+Theoretical orientation tensor:
+[[0.0669873 0.25     ]
+ [0.25      0.9330127]]
+FT orientation tensor:
+[[ 0.20548097 -0.1443122 ]
+ [-0.1443122   0.78376105]]
+L2-norm error: 0.593650384587744
+Theoretical anisotropy tensor:
+[[-0.4330127  0.25     ]
+ [ 0.25       0.4330127]]
+FT anisotropy tensor:
+[[-0.29451903 -0.1443122 ]
+ [-0.1443122   0.28376105]]
+L2-norm error: 0.593650384587744
+
+Rotation: 80 deg
+Theoretical orientation tensor:
+[[0.03015369 0.17101007]
+ [0.17101007 0.96984631]]
+FT orientation tensor:
+[[ 0.17373077 -0.09592683]
+ [-0.09592683  0.81579241]]
+L2-norm error: 0.4322702887394522
+Theoretical anisotropy tensor:
+[[-0.46984631  0.17101007]
+ [ 0.17101007  0.46984631]]
+FT anisotropy tensor:
+[[-0.32626923 -0.09592683]
+ [-0.09592683  0.31579241]]
+L2-norm error: 0.4322702887394522
+
+Rotation: 85 deg
+Theoretical orientation tensor:
+[[0.00759612 0.08682409]
+ [0.08682409 0.99240388]]
+FT orientation tensor:
+[[ 0.14408974 -0.04756484]
+ [-0.04756484  0.84551275]]
+L2-norm error: 0.27627572888831886
+Theoretical anisotropy tensor:
+[[-0.49240388  0.08682409]
+ [ 0.08682409  0.49240388]]
+FT anisotropy tensor:
+[[-0.35591026 -0.04756484]
+ [-0.04756484  0.34551275]]
+L2-norm error: 0.27627572888831886
+
+Rotation: 90 deg
+Theoretical orientation tensor:
+[[3.74939946e-33 6.12323400e-17]
+ [6.12323400e-17 1.00000000e+00]]
+FT orientation tensor:
+[[1.19439411e-01 5.51083214e-04]
+ [5.51083214e-04 8.70112459e-01]]
+L2-norm error: 0.17645722871272468
+Theoretical anisotropy tensor:
+[[-5.000000e-01  6.123234e-17]
+ [ 6.123234e-17  5.000000e-01]]
+FT anisotropy tensor:
+[[-0.38056059  0.00055108]
+ [ 0.00055108  0.37011246]]
+L2-norm error: 0.17645722871272468
+

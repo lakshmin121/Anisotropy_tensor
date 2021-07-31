@@ -31,7 +31,7 @@ if not os.path.exists(outDir):
 
 # Analysis parameters
 mu = [0, 90]
-kappa = [0.1, 0.25]  #, 0.5, 1, 5]
+kappa = [0.1, 0.25, 0.5, 1, 5]
 windowName = 'hann'  # window applied to image before FT
 xWidth = 50  # px, image local neighbourhood width in x-direction
 yWidth = xWidth  # A square neighbourhood is well-conditioned for FT analysis
@@ -134,96 +134,99 @@ for m in mu:
         relerr_locFT_series.append(relerr_locFT)
         relerr_locFT_fact_series.append(relerr_locFT_fact)
 
-        # # DOCUMENTATION
-        # fig = plt.figure(figsize=(3.7, 2))
-        # ax = fig.gca()
-        # plt.bar(phiBins, np.append(phiHist, np.nan), width=0.9 * dphi, align='edge', lw=0)
-        # plt.plot(phiBinc, phiODF2_theo, color=np.asarray([176, 21, 21]) / 255, lw=0.75, linestyle='-', label='Theoretical')
-        # plt.plot(phiBinc, phiODF2, color=np.asarray([230, 100, 20]) / 255, lw=0.75, linestyle='--', label='FT')
-        # plt.plot(phiBinc, phiODF2w, color='black', lw=0.75, linestyle='dotted', label='Localised FT 2nd')
-        # legend = plt.legend(loc='upper center', fontsize=10, ncol=3, numpoints=5,
-        #                     frameon=True, mode=None, fancybox=False,
-        #                     columnspacing=0.5, borderaxespad=0.15, edgecolor='darkgray')
-        # legend.get_frame().set_linewidth(0.5)
-        #
-        # xticks = phiBins[::3]
-        # ax.set_xlim([phiBins[0], phiBins[-1]])
-        # ymax = np.max(phiHist)
-        # if ymax > 0.01:
-        #     yticks = get_yticks(ymax, s=0.01)
-        # else:
-        #     yticks = get_yticks(ymax, s=0.005)
-        # ax.set_ylim([yticks[0], yticks[-1]])
-        # ax.set_yticks(yticks)
-        # ax.set_xticks(xticks)
-        # plt.xticks(rotation=90)
-        # plt.yticks(rotation=90)
-        # ax.set_xticklabels(xticks)
-        # ax.set_xlabel("$\phi$ [degrees]")
-        # ax.set_ylabel("p($\phi$)")
-        #
-        # fig.savefig(os.path.join(outDir, plot_fname), dpi=300)
-        #
-        # # General information to text file
-        # with open(os.path.join(outDir, txt_fname), 'w+') as f:
-        #     f.write("# Input \n")
-        #     f.write("# ----- \n")
-        #     f.write("Image: {}\n".format(img_fname))
-        #     f.write("PMF (histogram) data: {}\n".format(prob_fname))
-        #
-        #     f.write("\n\n# Theoretical Distribution (used to generate image)\n")
-        #     f.write("# ------------------------ \n")
-        #     f.write("Check: Total probability from PMF = {}\n".format(np.sum(phiHist) * dphi))
-        #     f.write("\nEstimating the tensor representation of theoretical PMF\n")
-        #     f.write("Orientation tensor (theoretical): \n")
-        #     f.write("{}\n".format(Q2_theo))
-        #     f.write("Anisotropy tensor (theoretical): \n")
-        #     f.write("{}\n".format(A2_theo))
-        #     f.write("\nEstimating ODF (continuous) from the tensor representation of theoretical PMF\n")
-        #     f.write("Check: Total probability from PMF = {}\n".format(np.sum(phiODF2_theo) * dphi))
-        #
-        #     f.write("\n\n# Distribution from Fourier Analysis of Image\n")
-        #     f.write("# -------------------------------------------- \n")
-        #     f.write("Image shape: {}\n".format(img.shape))
-        #     f.write("Image window used: {}\n".format(windowName))
-        #     f.write("\nEstimating the tensor representation in Fourier space\n")
-        #     f.write("Orientation tensor (FT, 2nd order): \n")
-        #     f.write("{}\n".format(Q2))
-        #     f.write("Anisotropy tensor (FT, 2nd order): \n")
-        #     f.write("{}\n".format(A2))
-        #     f.write("\nEstimating ODF (continuous) from the tensor representation of theoretical PMF\n")
-        #     f.write("Check: Total probability from FT ODF = {}\n".format(np.sum(phiODF2) * dphi))
-        #
-        #     f.write("\n\n# Distribution from Localised Fourier Analysis of Image\n")
-        #     f.write("# ------------------------------------------------------ \n")
-        #     f.write("Local neighbourhood selection: \n")
-        #     f.write("\t x-width: {} px\n".format(xWidth))
-        #     f.write("\t y-width: {} px\n".format(yWidth))
-        #     f.write("\t x-step: {} px\n".format(xStep))
-        #     f.write("\t x-step: {} px\n".format(yStep))
-        #     f.write("\nEstimating the tensor representation using Localised Fourier Transform\n")
-        #     f.write("Orientation tensor (localised FT, 2nd order): \n")
-        #     f.write("{}\n".format(Q2w))
-        #     f.write("Anisotropy tensor (localised FT, 2nd order): \n")
-        #     f.write("{}\t Note: anisotropy is multiplied by factor=2.\n".format(A2w*2))
-        #
-        #     f.write("\n\n# Eigenvalues: \n")
-        #     f.write("\t Theoretical: {}\n".format(eigvals_theo))
-        #     f.write("\t FT: {}\n".format(eigvals2_))
-        #     f.write("\t FT factored: {}\n".format(eigvals2))
-        #     f.write("\t localised FT: {}\n".format(eigvals2w_))
-        #     f.write("\t localised FT factored: {}\n".format(eigvals2w))
-        #
-        #     f.write("\n\n# Relative Error: \n")
-        #     f.write("\t FT: {}\n".format(relerr_FT))
-        #     f.write("\t FT factored: {}\n".format(relerr_FT_fact))
-        #     f.write("\t localised FT: {}\n".format(relerr_locFT))
-        #     f.write("\t localised FT factored: {}\n".format(relerr_locFT_fact))
+        # DOCUMENTATION
+        fig = plt.figure(figsize=(3.7, 2))
+        ax = fig.gca()
+        plt.bar(phiBins, np.append(phiHist, np.nan), width=0.9 * dphi, align='edge', lw=0)
+        plt.plot(phiBinc, phiODF2_theo, color=np.asarray([176, 21, 21]) / 255, lw=0.75, linestyle='-', label='Theoretical')
+        plt.plot(phiBinc, phiODF2, color=np.asarray([230, 100, 20]) / 255, lw=0.75, linestyle='--', label='FT')
+        plt.plot(phiBinc, phiODF2w, color='black', lw=0.75, linestyle='dotted', label='Localised FT 2nd')
+        legend = plt.legend(loc='upper center', fontsize=10, ncol=3, numpoints=5,
+                            frameon=True, mode=None, fancybox=False,
+                            columnspacing=0.5, borderaxespad=0.15, edgecolor='darkgray')
+        legend.get_frame().set_linewidth(0.5)
+
+        xticks = phiBins[::3]
+        ax.set_xlim([phiBins[0], phiBins[-1]])
+        ymax = np.max(phiHist)
+        if ymax > 0.01:
+            yticks = get_yticks(ymax, s=0.01)
+        else:
+            yticks = get_yticks(ymax, s=0.005)
+        ax.set_ylim([yticks[0], yticks[-1]])
+        ax.set_yticks(yticks)
+        ax.set_xticks(xticks)
+        plt.xticks(rotation=90)
+        plt.yticks(rotation=90)
+        ax.set_xticklabels(xticks)
+        ax.set_xlabel("$\phi$ [degrees]")
+        ax.set_ylabel("p($\phi$)")
+
+        fig.savefig(os.path.join(outDir, plot_fname), dpi=300)
+
+        # General information to text file
+        with open(os.path.join(outDir, txt_fname), 'w+') as f:
+            f.write("# Input \n")
+            f.write("# ----- \n")
+            f.write("Image: {}\n".format(img_fname))
+            f.write("PMF (histogram) data: {}\n".format(prob_fname))
+
+            f.write("\n\n# Theoretical Distribution (used to generate image)\n")
+            f.write("# ------------------------ \n")
+            f.write("Check: Total probability from PMF = {}\n".format(np.sum(phiHist) * dphi))
+            f.write("\nEstimating the tensor representation of theoretical PMF\n")
+            f.write("Orientation tensor (theoretical): \n")
+            f.write("{}\n".format(Q2_theo))
+            f.write("Anisotropy tensor (theoretical): \n")
+            f.write("{}\n".format(A2_theo))
+            f.write("\nEstimating ODF (continuous) from the tensor representation of theoretical PMF\n")
+            f.write("Check: Total probability from PMF = {}\n".format(np.sum(phiODF2_theo) * dphi))
+
+            f.write("\n\n# Distribution from Fourier Analysis of Image\n")
+            f.write("# -------------------------------------------- \n")
+            f.write("Image shape: {}\n".format(img.shape))
+            f.write("Image window used: {}\n".format(windowName))
+            f.write("\nEstimating the tensor representation in Fourier space\n")
+            f.write("Orientation tensor (FT, 2nd order): \n")
+            f.write("{}\n".format(Q2))
+            f.write("Anisotropy tensor (FT, 2nd order): \n")
+            f.write("{}\n".format(A2))
+            f.write("\nEstimating ODF (continuous) from the tensor representation of theoretical PMF\n")
+            f.write("Check: Total probability from FT ODF = {}\n".format(np.sum(phiODF2) * dphi))
+
+            f.write("\n\n# Distribution from Localised Fourier Analysis of Image\n")
+            f.write("# ------------------------------------------------------ \n")
+            f.write("Local neighbourhood selection: \n")
+            f.write("\t x-width: {} px\n".format(xWidth))
+            f.write("\t y-width: {} px\n".format(yWidth))
+            f.write("\t x-step: {} px\n".format(xStep))
+            f.write("\t x-step: {} px\n".format(yStep))
+            f.write("\nEstimating the tensor representation using Localised Fourier Transform\n")
+            f.write("Orientation tensor (localised FT, 2nd order): \n")
+            f.write("{}\n".format(Q2w))
+            f.write("Anisotropy tensor (localised FT, 2nd order): \n")
+            f.write("{}\t Note: anisotropy is multiplied by factor=2.\n".format(A2w*2))
+
+            f.write("\n\n# Eigenvalues: \n")
+            f.write("\t Theoretical: {}\n".format(eigvals_theo))
+            f.write("\t FT: {}\n".format(eigvals2_))
+            f.write("\t FT factored: {}\n".format(eigvals2))
+            f.write("\t localised FT: {}\n".format(eigvals2w_))
+            f.write("\t localised FT factored: {}\n".format(eigvals2w))
+
+            f.write("\n\n# Relative Error: \n")
+            f.write("\t FT: {}\n".format(relerr_FT))
+            f.write("\t FT factored: {}\n".format(relerr_FT_fact))
+            f.write("\t localised FT: {}\n".format(relerr_locFT))
+            f.write("\t localised FT factored: {}\n".format(relerr_locFT_fact))
 
 
-# ERROR SUMMARY PLOT
+# ERROR SUMMARY
 keys = ['FT', 'factored FT', 'localised-FT', 'factored localised-FT']
 dframe = dict(zip(keys, [relerr_FT_series, relerr_FT_fact_series, relerr_locFT_series, relerr_locFT_fact_series]))
+dframe = pd.DataFrame(dframe)
+dframe.to_csv(os.path.join(outDir, err_summary_file))
+
 # sns.color_palette("rocket")
 # assert len(relerr_FT_series) == len(mu) * len(kappa)
 # errfig = plt.figure(figsize=set_fig_size(3.54, 1))

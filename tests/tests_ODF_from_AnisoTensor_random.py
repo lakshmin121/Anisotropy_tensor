@@ -36,7 +36,7 @@ def generate_fibre_orientations(odf='vonmises', size=1, **kwargs):
     elif odf == 'uniform':
         try:
             phidomainDeg = kwargs['phidomainDeg']
-            phi_vals = op.uniform(phidomainDeg=phidomainDeg, size=size)
+            phi_vals = op.uniform(domainDeg=phidomainDeg, size=size)
         except KeyError:
             print("using default domain (0, 180) degrees for uniform distribution.")
             phi_vals = op.uniform(size=size)

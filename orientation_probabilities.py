@@ -6,10 +6,10 @@ import numpy as np
 from numpy import random
 
 
-def uniform(phidomainDeg=(0, 180), size=None):
-    phiLow, phiHigh = phidomainDeg  # angular domain in deg
+def uniform(domainDeg=(0, 180), size=None):
+    phiLow, phiHigh = domainDeg  # angular domain in deg
     if phiLow > phiHigh:
-        phiHigh, phiLow = phidomainDeg  # angular domain in deg
+        phiHigh, phiLow = domainDeg  # angular domain in deg
     return random.uniform(low=phiLow, high=phiHigh, size=size)
 
 
@@ -20,13 +20,13 @@ def vonmises(muDeg=0.0, kappa=1.0, spreadDeg=180, size=None):
     return phivals
 
 
-def sin(phidomainDeg=(-90, 90), symmetric=True, size=None):
-    phiLow, phiHigh = phidomainDeg  # angular domain in deg
+def sin(domainDeg=(-90, 90), symmetric=True, size=None):
+    phiLow, phiHigh = domainDeg  # angular domain in deg
     if phiLow > phiHigh:
-        phiHigh, phiLow = phidomainDeg  # angular domain in deg
+        phiHigh, phiLow = domainDeg  # angular domain in deg
     if symmetric:
         if size is None:
-            sin_(phidomainDeg, size)
+            sin_(domainDeg, size)
         else:
             m = 0.5 * (phiLow + phiHigh)
             sz1 = size//2
@@ -38,12 +38,12 @@ def sin(phidomainDeg=(-90, 90), symmetric=True, size=None):
             phivals = np.concatenate((phivals1, phivals2))
             return phivals
     else:
-        phivals = sin_(phidomainDeg, size)
+        phivals = sin_(domainDeg, size)
         return phivals
 
 
-def sin_(phidomainDeg, size=None):
-    phiLow, phiHigh = phidomainDeg  # angular domain in deg
+def sin_(domainDeg, size=None):
+    phiLow, phiHigh = domainDeg  # angular domain in deg
     s = 2 * (phiHigh - phiLow) / np.pi  # scale
     u = random.uniform(0, 1, size=size)
     phivals = s * np.arccos(1 - u) + phiLow

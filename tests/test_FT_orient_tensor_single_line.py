@@ -20,13 +20,13 @@ from fibfourier import fourier_orient_tensor, fourier_orient_tensor_2order
 from fiborient import theo_orient_tensor_2D
 
 outDir = "tests_FT_of_lines"
-txt_fname = "single_lines.txt"
+txt_fname = "single_lines_halflen.txt"
 
 if not path.exists(outDir):
     os.mkdir(outDir)
 
 img = np.zeros((50, 50))
-img[24:27, :] = 1  # image with a straight line along X-axis passing through origin with thickness 3 px
+img[24:27, 24:] = 1  # image with a straight line along X-axis passing through origin with thickness 3 px
 rotations = np.arange(0, 91, 5)
 
 with open(path.join(outDir, txt_fname), 'w+') as f:

@@ -180,7 +180,7 @@ def fourier_orient_tensor(image, windowName=None, order=2):
     else:
         wimg = image
     wimgFT = np.abs(fftshift(fft2(wimg)))  # FT
-    wimgFT = rotate(wimgFT, -90, order=3)  # rotating image to match orientation of FT space with real space
+    wimgFT = rotate(wimgFT, 90, order=3)  # rotating image to match orientation of FT space with real space
     # print("wimgFT min-max: ", np.min(wimgFT), np.max(wimgFT))
 
     # Calculation of orientation tensor in Fourier space:

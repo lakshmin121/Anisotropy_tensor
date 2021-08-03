@@ -180,7 +180,7 @@ for m in mu:
             f.write("Anisotropy tensor (theoretical): \n")
             f.write("{}\n".format(A2_theo))
             f.write("\nEstimating ODF (continuous) from the tensor representation of theoretical PMF\n")
-            f.write("Check: Total probability from PMF = {}\n".format(np.sum(phiODF2_theo) * dphi))
+            f.write("Check: Total probability from ODF = {}\n".format(np.sum(phiODF2_theo) * dphi))
 
             f.write("\n\n# Distribution from Fourier Analysis of Image\n")
             f.write("# -------------------------------------------- \n")

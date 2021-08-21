@@ -4,12 +4,10 @@ import sys
 sys.path.append("..")
 import numpy as np
 import pandas as pd
-from skimage import img_as_float
 import skimage.io as skio
-from skimage.transform import rotate, rescale, warp_polar
+from skimage.transform import warp_polar
 from skimage.filters import window
 from scipy.fftpack import fft2, fftshift
-from scipy.interpolate import interp2d
 from matplotlib import pyplot as plt
 from matplotlib_settings import *
 from fiborient import tensor2odf_2D, orient_tensor_2D
@@ -19,7 +17,6 @@ dataDir = "../data/test_images_2D/vf20_ar50_tk50"
 outDir = "../data/test_images_2D/vf20_ar50_tk50_polar"
 muDeg = [0, 90]
 kappa = [0.1, 0.25, 0.5, 1, 5]
-# ncases = len(mu) * len(kappa)
 windowFT = 'hann'
 zpad_factor = 10.5
 
@@ -29,9 +26,6 @@ zpad_factor = 10.5
 
 for mu in muDeg:
     for k in kappa:
-# mu = 90
-# k = 1
-
         print(mu, k)
         imgName = 'vm_m{0}k{1}'.format(mu, k)
         img_fname = imgName + '.tiff'  # image to be analysed
@@ -118,7 +112,7 @@ for mu in muDeg:
         Q2, A2 = orient_tensor_2D(phiHistp, phiBinspc)
         phiODF2 = tensor2odf_2D(phiBinspc, A2) * 2 * np.pi / 180
         dphip = np.mean(phiBinsp[1:] - phiBinsp[:-1])
-        print("Check: Total probability from theoretical ODF = ", np.sum(phiODF2) * dphip)
+        print("Check: Total probability from FT ODF = ", np.sum(phiODF2) * dphip)
 
 
         # DOCUMENTATION

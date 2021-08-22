@@ -27,7 +27,44 @@ def delta(i, j):
         return 0
 
 
-def sliding_window(img, x_width, y_width, x_step=1, y_step=1):
+def imgfft(img, windowName=None, zpad_factor=1):
+    """
+    Spectrum of an image.
+    :param img: Input image
+    :type img: ndarray
+    :param windowName: Name of window to be used. Preferred 'hann' or 'blackmanharris'
+    :param zpad_factor: Input image shape multiplied by zpad_factor gives size of zero-padded image for FT.
+    :type zpad_factor: float
+    :return: spectrum (magnitude) of input image. Output is an ndarray with shape = input image shape * zpad_factor.
+    Notes:
+    1. Windowing minimizes the effects on FT due to the use of a finite signal (image). FT assumes the data to
+    represent a full cycle such that the image repeats itself beyond the boundaries. Windowing smoothly
+    reduce the image intensity towards the boundaries of the image. Heuristically, the windows apt for the specific
+    purpose of this function are 'hann' and 'blackmanharris'. Refer: https://en.wikipedia.org/wiki/Window_function
+    2. Zero-padding is the process of padding the image with zeros beyond its boundaries. This allows the calculation
+    of more Fourier coefficients, thus, a smoother frequency spectrum. For the purpose of this function, consider this
+    as a better resolution of the image in FT space.
+    Refer: https://dspillustrations.com/pages/posts/misc/spectral-leakage-zero-padding-and-frequency-resolution.html
+    """
+    if img.ndim > 2:  # if color image, convert to gray.
+        img = rgb2gray(img)
+    img = img_as_float(img)
+
+    # Fourier Transform
+    if windowName is not None:
+        # windowed and zero-padded FT
+        shp = img.shape  # image shape as tuple
+        shparr = np.array(shp)  # shape as array
+        zpad_shp = np.round(shparr * zpad_factor, 0).astype(np.int)  # zero-padded shape of imager
+        wimg = img * window(windowName, img.shape)  # windowing the image
+        wimgFT = np.absolute(fftshift(fft2(wimg, tuple(zpad_shp))))  # FT of windowed and zero padded image.
+    else:
+        # windowless FT
+        wimgFT = np.absolute(fftshift(fft2(img)))  # FT
+    return wimgFT
+
+
+def sliding_window(img, x_width, y_width, x_step=1, y_step=1): # TODO: change to patch
     """
     Returns an iterator containing the location and image captured by a sliding window.
     :param img: original image across which the window has to slide.
@@ -61,7 +98,7 @@ def sliding_window(img, x_width, y_width, x_step=1, y_step=1):
         for y in range(0, n, y_step):  # y-coordinate of sliding window centre
             yield x, y, img_bordered[x:x + x_width, y:y + y_width]
 
-
+# TODO: update sliding window to patch
 def localised_fourier_orient_tensor(img, x_width, y_width, x_step=1, y_step=1, windowName=None, order=2):
     """
     Evaluates a function applied to a sub-image selected by a sliding window,
@@ -129,16 +166,22 @@ def localised_fourier_orient_tensor(img, x_width, y_width, x_step=1, y_step=1, w
     print("Local operation: elapsed time: ", time.time() - opStart)
     return Q, A
 
-
-def fourier_orient_tensor_2order(image, windowName=None):
+# TODO: include the effect of rmin, rmax?
+def fourier_orient_tensor_2order(image, windowName=None, zpad_factor=1):
+    """
+    Estimation of orientation and anisotropy tensors from the FT of image.
+    :param image:
+    :param windowName:
+    :param zpad_factor:
+    :return:
+    """
     if image.ndim > 2:
         image = rgb2gray(image)
     image = img_as_float(image)
 
     # Fourier Transform
-
-    wimg = image * window(windowName, image.shape)  # windowing the image
-    wimgFT = np.abs(fftshift(fft2(wimg)))  # FT
+    wimgFT = imgfft(image, windowName=windowName, zpad_factor=zpad_factor)
+    # wimgFT -= np.mean(wimgFT)  # removing mean
 
     # Calculation of orientation tensor in Fourier space:
     m, n = wimgFT.shape
@@ -168,7 +211,7 @@ def fourier_orient_tensor_2order(image, windowName=None):
     A = Q - 0.5 * np.eye(2)
     return Q, A
 
-
+# TODO: include the effect of rmin, rmax? change estimation of wimgFT
 def fourier_orient_tensor(image, windowName=None, order=2):
     if image.ndim > 2:
         image = rgb2gray(image)

@@ -40,7 +40,7 @@ def orient_tensor_2D(prob_phi, phi_valsDeg, order=2):
     elif len(phi_valsDeg) == len(prob_phi):
         pass
     else:
-        raise ValueError("check dimensions of prob_phi and phi_vals")
+        raise ValueError("check dimensions of prob_phi and phi_vals: {0}, {1}".format(len(prob_phi), len(phi_valsDeg)))
 
     # check for total probability = 1
     d_phi = np.mean(phi_valsDeg[1:] - phi_valsDeg[:-1])  # mean bin width of phi values (delta_phi)

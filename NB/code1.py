@@ -1,0 +1,4 @@
+"""
+Implement intercept method.
+"""
+

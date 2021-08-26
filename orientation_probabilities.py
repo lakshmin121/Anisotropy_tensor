@@ -4,6 +4,7 @@ Popular orientation probability distributions for simulation of fibres in concre
 
 import numpy as np
 from numpy import random
+from scipy.interpolate import interp1d
 
 
 def uniform(domainDeg=(0, 180), size=None):
@@ -48,3 +49,33 @@ def sin_(domainDeg, size=None):
     u = random.uniform(0, 1, size=size)
     phivals = s * np.arccos(1 - u) + phiLow
     return phivals
+
+
+def map_rv2cos(x, pmf_x, y):
+    """
+    Estimates PMF p(y) for the tranformation y=cos(x) when the PMF p(x) is given.
+    :param x: input RV
+    :param pmf_x: PMF p(x) defined at the input x values; len(pmf_x) must be equal to len(x)
+    :param y: output RV values where the transformed PMF p(y = cos x) must be estimated.
+    :return: PMF of transformed RV.
+    """
+    assert len(x) == len(pmf_x), print("check input: len(x) not equal to len(pmf_x).")
+    F = interp1d(x, pmf_x, kind='quadratic', fill_value='extrapolate')
+    pmf_y = F(np.arccos(-y)) * (1 / np.sqrt(1 - y**2))
+    assert len(pmf_y) == len(y)
+    return pmf_y
+
+
+def map_rv2tan(x, pmf_x, y):
+    """
+    Estimates PMF p(y) for the tranformation y=tan(x) when the PMF p(x) is given.
+    :param x: input RV
+    :param pmf_x: PMF p(x) defined at the input x values; len(pmf_x) must be equal to len(x)
+    :param y: output RV values where the transformed PMF p(y = cos x) must be estimated.
+    :return: PMF of transformed RV.
+    """
+    assert len(x) == len(pmf_x), print("check input: len(x) not equal to len(pmf_x).")
+    F = interp1d(x, pmf_x, kind='quadratic', fill_value='extrapolate')
+    pmf_y = F(np.arctan(y)) * (1 / (1 + y**2))
+    assert len(pmf_y) == len(y)
+    return pmf_y

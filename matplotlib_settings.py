@@ -2,12 +2,13 @@
 Matplotlib settings for preparing consistent and beautiful figures for thesis.
 _____________________________________________________________________________
 @ Lakshminarayanan Mohana Kumar
-updated on: 22nd Aug 2021.
+updated on: 24th Aug 2021.
 """
 import matplotlib as mpl
+from matplotlib import pyplot as plt
 import seaborn as sns
 
-__version__ = '1.1'
+__version__ = '1.3'
 
 # units
 # 1 pt = 1/72 in = 0.353 mm
@@ -105,3 +106,9 @@ mpl.rcParams['figure.figsize'] = set_fig_size()
 mpl.rcParams['figure.dpi'] = 600
 
 mpl.rcParams['figure.constrained_layout.use'] = True
+
+# LaTex
+mpl.rcParams['mathtext.fontset'] = 'custom'
+mpl.rcParams['mathtext.rm'] = 'Times New Roman'
+mpl.rcParams['mathtext.it'] = 'Times New Roman:italic'
+mpl.rcParams['mathtext.bf'] = 'Times New Roman:bold'

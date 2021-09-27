@@ -6,6 +6,7 @@ import numpy as np
 from numpy import random
 from scipy.interpolate import interp1d
 from scipy.ndimage import gaussian_filter1d
+from scipy.integrate import simps
 
 def uniform(domainDeg=(0, 180), size=None):
     phiLow, phiHigh = domainDeg  # angular domain in deg
@@ -75,7 +76,7 @@ def map_rv2tan(x, pmf_x, y):
     :return: PMF of transformed RV.
     """
     assert len(x) == len(pmf_x), print("check input: len(x) not equal to len(pmf_x).")
-    F = interp1d(x, pmf_x, kind='quadratic', fill_value='extrapolate')
+    F = interp1d(x, pmf_x, kind='linear', fill_value='extrapolate')
     pmf_y = F(np.arctan(y)) * (1 / (1 + y**2))
     assert len(pmf_y) == len(y)
     return pmf_y
@@ -86,7 +87,7 @@ def map_rv2arctan(x, pmf_x, y):
     Estimates PMF p(y) for the tranformation y=arctan(x) when the PMF p(x) is given.
     """
     assert len(x) == len(pmf_x), print("check input: len(x) not equal to len(pmf_x).")
-    F = interp1d(x, pmf_x, kind='quadratic', fill_value='extrapolate')
+    F = interp1d(x, pmf_x, kind='linear', fill_value=0)
     pmf_y = F(np.tan(y)) * (1 / np.cos(y))**2
     assert len(pmf_y) == len(y)
     return pmf_y
@@ -96,7 +97,7 @@ def product_distr(x, y, z, pmfx, pmfy, atol=1e-4):
     assert len(x) == len(pmfx)
     assert len(y) == len(pmfy)
 
-    fx = interp1d(x, pmfx, kind='quadratic', bounds_error=False, fill_value=(0, 0))
+    fx = interp1d(x, pmfx, kind='linear', bounds_error=False, fill_value=(0, 0))
     pmfz = []
 
     # Masking to avoid zero division error.
@@ -116,19 +117,51 @@ def ratio_distr(x, y, z, pmfx, pmfy, atol=1e-4):
     assert len(x) == len(pmfx)
     assert len(y) == len(pmfy)
 
-    fx = interp1d(x, pmfx, kind='quadratic', bounds_error=False, fill_value=(0, 0))
+    fx = interp1d(x, pmfx, kind='linear', bounds_error=False, fill_value=(0, 0))
     pmfz = []
 
     # # Masking to avoid zero division error.
-    mask1 = np.isclose(np.abs(y), 0, atol=atol)
-    mask2 = np.isclose(np.abs(y), np.pi/2, atol=atol)
-    mask = mask1 & mask2
-    y_mskd = y[~mask]
-    pmfy_mskd = pmfy[~mask]
+    # mask1 = np.isclose(np.abs(y), 0, atol=atol)
+    # mask2 = np.isclose(np.abs(y), np.pi/2, atol=atol)
+    # mask = mask1 | mask2
+    # y_mskd = y[~mask]
+    # pmfy_mskd = pmfy[~mask]
+    # y[mask] = 0
 
     for k in z:
-        p_mskd = np.abs(y_mskd) * pmfy_mskd * fx(k * y_mskd)
+        # p_mskd = np.abs(y_mskd) * pmfy_mskd * fx(k * y_mskd)
         # p_mskd[np.abs(p_mskd) < atol] = 0  # removing numerically very small values
-        p = np.trapz(p_mskd, y_mskd)  # integration (trapezoidal rule)
+        # p = np.trapz(p_mskd, y_mskd)  # integration (trapezoidal rule)
+        p = np.abs(y) * pmfy * fx(k * y)
+        p = np.trapz(p, y) # integration (trapezoidal rule)
+        pmfz.append(p)
+    return pmfz
+
+
+def ratio_distr2(x, y, z, pmfx, pmfy, atol=1e-4):
+    assert len(x) == len(pmfx)
+    assert len(y) == len(pmfy)
+
+    yvals = y
+    yvals = np.append(yvals, atol)
+
+    fy = interp1d(y, pmfy, kind='linear', bounds_error=False, fill_value=(0, 0))
+    fx = interp1d(x, pmfx, kind='linear', bounds_error=False, fill_value=(0, 0))
+    pmfz = []
+
+    # # Masking to avoid zero division error.
+    # mask1 = np.isclose(np.abs(y), 0, atol=atol)
+    # mask2 = np.isclose(np.abs(y), np.pi/2, atol=atol)
+    # mask = mask1 | mask2
+    # y_mskd = y[~mask]
+    # pmfy_mskd = pmfy[~mask]
+    # y[mask] = 0
+
+    for k in z:
+        # p_mskd = np.abs(y_mskd) * pmfy_mskd * fx(k * y_mskd)
+        # p_mskd[np.abs(p_mskd) < atol] = 0  # removing numerically very small values
+        # p = np.trapz(p_mskd, y_mskd)  # integration (trapezoidal rule)
+        p = np.abs(yvals)**100 * fy(yvals) * fx(k * yvals)
+        p = simps(p, yvals)  # integration (trapezoidal rule)
         pmfz.append(p)
     return pmfz

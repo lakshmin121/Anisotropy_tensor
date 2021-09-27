@@ -32,9 +32,10 @@ phiVals = np.deg2rad(np.arange(0.5, 180))
 thtVals = phiVals - np.pi/2
 alpVals = thtVals
 
-phiBins = np.deg2rad(np.arange(0, 181, 10))
+b = 1
+phiBins = np.deg2rad(np.arange(0, 180.5, b))
 phiBinc = 0.5 * (phiBins[1:] + phiBins[:-1])
-thtBins = np.deg2rad(np.arange(-90, 91, 10))
+thtBins = np.deg2rad(np.arange(-90, 90.5, b))
 thtBinc = 0.5 * (thtBins[1:] + thtBins[:-1])
 alpBins = thtBins
 alpBinc = thtBinc
@@ -75,7 +76,7 @@ fig_phiDistr.savefig(os.path.join(outDir, 'phiDistr.tiff'))
 fig_thtDistr.savefig(os.path.join(outDir, 'thtDistr.tiff'))
 fig_alpDistr.savefig(os.path.join(outDir, 'alpDistr.tiff'))
 
-
+"""
 # Estimating Distribution of Theta from Phi and Alpha
 cos_phiBinc = np.cos(phiBinc)
 cos_phiPMF = map_rv2cos(phiBinc, phiODF, cos_phiBinc)
@@ -116,8 +117,31 @@ ax.set_ylabel("$p(\\tan{\\theta})$")
 
 fig_tan_thtDistr.savefig(os.path.join(outDir, 'tan_thtDistr.tiff'))
 
+
+
 # Theta
 thtPMF = map_rv2arctan(tan_thtBinc, tan_thtPMF, thtBinc)
+"""
+
+
+# -----------
+# phiBinc = np.deg2rad(phiBinspc)
+cos_phiBinc = np.cos(phiBinc)
+cos_phiPMF = map_rv2cos(phiBinc, phiODF, cos_phiBinc)
+
+# alpBinc = np.deg2rad(alphaBinspc - 89)
+print(alpBinc)
+tan_alpBinc = np.tan(alpBinc)
+tan_alpPMF = map_rv2tan(alpBinc, alpODF, tan_alpBinc)
+
+# Ratio distribution
+thtBinc = alpBinc
+tan_thtBinc = np.tan(thtBinc)
+tan_thtPMF = ratio_distr(tan_alpBinc, cos_phiBinc[::-1], tan_thtBinc, tan_alpPMF, cos_phiPMF[::-1])
+print("Total tan theta probability: ", np.trapz(tan_thtPMF, tan_thtBinc))
+
+thtPMF = map_rv2arctan(tan_thtBinc, tan_thtPMF, thtBinc)
+# ------------
 
 fig_tht2Distr = plt.figure(figsize=(2, 2))
 ax = fig_tht2Distr.gca()

@@ -48,6 +48,7 @@ def joint_probability(thetaVals, phiVals, nbins = 36):
 
 
 def tensor_2nd_order(probThetaPhi, thetaVals, phiVals):
+    global SECONDORDER_SIZE
     # unit vectors:
     uvec = np.zeros((3, len(thetaVals), len(phiVals)))
     uvec[0, :, :] = np.outer(np.sin(thetaVals), np.cos(phiVals))
@@ -56,8 +57,6 @@ def tensor_2nd_order(probThetaPhi, thetaVals, phiVals):
 
     assert uvec[0].shape == probThetaPhi.shape, \
         print("Shapes of joint probability {0} and unit-vector {1} does not match.".format(uvec[0].shape, p_tht_phi.shape))
-
-    global SECONDORDER_SIZE
     orientTensor = np.zeros((SECONDORDER_SIZE, SECONDORDER_SIZE))
     for i in range(SECONDORDER_SIZE):
         for j in range(SECONDORDER_SIZE):
@@ -69,14 +68,27 @@ def tensor_2nd_order(probThetaPhi, thetaVals, phiVals):
     return orientTensor, anisoTensor
 
 
-def rotate_2nd_order(rotAngles=(0, 0, 0)):
+def cycle_indices(size):  # Tested OK
+    all_indices = np.arange(size).astype(np.int)  # indices are integers
+    for s in range(size):
+        yield tuple(np.roll(all_indices, shift=s))
 
-    xRot, yRot, zRot = np.deg2rad(np.asarray((20, 30, 60)))
-    xCos, xSin = np.cos(xRot), np.sin(xRot)
-    yCos, ySin = np.cos(yRot), np.sin(yRot)
-    zCos, zSin = np.cos(zRot), np.sin(zRot)
-    Rx = np.eye(SECONDORDER_SIZE)
 
+def rotate_2nd_order(rotAnglesDeg=(0, 0, 0), rotAnglesRad=None):  # Tested OK
+    if rotAnglesRad is None:
+        rotAnglesRad = np.deg2rad(rotAnglesDeg)
+
+    rotMat = np.eye(3)
+    for r, i, j in cycle_indices(3):
+        # r is the axis about which rotation is performed.
+        rotRad = rotAnglesRad[r]
+        if rotRad > 0:
+            rCos, rSin = np.cos(rotRad), np.sin(rotRad)
+            rotMat_r = np.eye(3)
+            rotMat_r[i, i], rotMat_r[i, j], rotMat_r[j, i], rotMat_r[j, j] = rCos, - rSin, rSin, rCos
+            rotMat = rotMat @ rotMat_r
+
+    return rotMat
 
 
 '''
@@ -135,7 +147,7 @@ print("Anisotropy tensor: \n", anisoTensor2nd)
 
 # Rotation
 
-#
+
 # print("Transformed tensor: ", R@A@R.T)
 
-plt.show()
+# plt.show()

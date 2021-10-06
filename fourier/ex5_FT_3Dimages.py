@@ -12,11 +12,7 @@ from glob import glob
 import numpy as np
 import pandas as pd
 import skimage.io as skio
-from skimage.transform import warp_polar, rotate
-# from skimage.filters import window
-# from scipy.fftpack import fft2, fftshift
-# from matplotlib import pyplot as plt
-# from mpl_toolkits.axes_grid1 import make_axes_locatable
+from skimage.transform import warp_polar
 from matplotlib_settings import *
 from fibfourier import imgfft
 from fiborient import tensor2odf_2D, orient_tensor_2D
@@ -136,29 +132,29 @@ if __name__ == '__main__':
     print("fibre length: {} px, diameter: {} px".format(fiblen, fibdia))
 
 
-    # -----------------------------------------------------------------------------------------------------------------
-    # FOURIER ANALYSIS OF Z-PROJECTION
-    # Fourier Transform
-    imgzFT = imgfft(imgz, windowName=windowName, zpad_factor=zpad_factor)
-    imgzFT -= np.mean(imgzFT)  # removing the average (similar to thresholding).
-    imgzFTlog = np.nan_to_num(np.log(1+imgzFT), 0)  # spectrum in log scale + convert any nan generated to zero.
-
-    # Bounds in FT space as a minimization problem
-    rindx, rVals, energyVals, gradVals = energy_boundary(imgzFTlog, step=zpad_factor*5)
-    rBound = rVals[rindx]
-
-    # Polar warp
-    phiHistp, imgzFTpolar = polarFT_hist(imgzFT, rmin=int(fibdia * zpad_factor), rmax=rBound)
-    phiHistp = np.roll(phiHistp, -90)
-    phiBinsp = np.arange(0, 181, 1)
-    phiBinspc = 0.5 * (phiBinsp[1:] + phiBinsp[:-1])
-
-    # Tensor from FT
-    Qphi, Aphi = orient_tensor_2D(phiHistp, phiBinspc)
-    phiODF2 = tensor2odf_2D(np.pi - phiBinspc, Aphi) * 2 * np.pi / 180
-    # dphip = np.mean(phiBinsp[1:] - phiBinsp[:-1])
-    print("Check: Total probability from FT ODF (phi) = ", np.trapz(phiODF2, phiBinspc))
-
+    # # -----------------------------------------------------------------------------------------------------------------
+    # # FOURIER ANALYSIS OF Z-PROJECTION
+    # # Fourier Transform
+    # imgzFT = imgfft(imgz, windowName=windowName, zpad_factor=zpad_factor)
+    # imgzFT -= np.mean(imgzFT)  # removing the average (similar to thresholding).
+    # imgzFTlog = np.nan_to_num(np.log(1+imgzFT), 0)  # spectrum in log scale + convert any nan generated to zero.
+    #
+    # # Bounds in FT space as a minimization problem
+    # rindx, rVals, energyVals, gradVals = energy_boundary(imgzFTlog, step=zpad_factor*5)
+    # rBound = rVals[rindx]
+    #
+    # # Polar warp
+    # phiHistp, imgzFTpolar = polarFT_hist(imgzFT, rmin=int(fibdia * zpad_factor), rmax=rBound)
+    # phiHistp = np.roll(phiHistp, -90)
+    # phiBinsp = np.arange(0, 181, 1)
+    # phiBinspc = 0.5 * (phiBinsp[1:] + phiBinsp[:-1])
+    #
+    # # Tensor from FT
+    # Qphi, Aphi = orient_tensor_2D(phiHistp, phiBinspc)
+    # phiODF2 = tensor2odf_2D(phiBinspc, Aphi) * 2 * np.pi / 180
+    # # dphip = np.mean(phiBinsp[1:] - phiBinsp[:-1])
+    # print("Check: Total probability from FT ODF (phi) = ", np.trapz(phiODF2, phiBinspc))
+    #
     # # Fibre Orientation (Histogram) used during generation of image.
     # phiDF = pd.read_csv(os.path.join(dataDir, phifName))  # read histogram data from CSV file.
     # phiBins = phiDF['phiBins'].to_numpy()
@@ -169,38 +165,12 @@ if __name__ == '__main__':
     # phiHist = phiDF['phiHist'].to_numpy()
     # phiHist = phiHist[:-1]
     # dphi = np.mean(phiBins[1:] - phiBins[:-1])
-    # print("Check: Total probability from theoretical PMF = ", np.sum(phiHist) * dphi)
-    #
-    # phiBinsExtnd = np.arange(0, 361, dphi)
-    # phiHistExtnd = np.concatenate((phiHist / 2, phiHist / 2))
-    # msg = "len(phiBinsExtnd) = {0} while len(phiHistExtnd) = {1}".format(len(phiBinsExtnd), len(phiHistExtnd))
-    # assert len(phiBinsExtnd) == len(phiHistExtnd) + 1, print(msg)
+    # print("Check: Total probability from theoretical PMF (phi) = ", np.trapz(phiHist, phiBinc))
     #
     # # Theoretical tensor and ODF from histogram
     # Q2_theo, A2_theo = orient_tensor_2D(phiHist, phiBinc)
     # phiODF2_theo = tensor2odf_2D(phiBinc, A2_theo) * 2 * np.pi / 180
-    # print("Check: Total probability from theoretical ODF = ", np.sum(phiODF2_theo) * dphi)
-    #
-    # # TODO: add axis labels to all figures.
-    # figar = plt.figure(figsize=(2, 2), dpi=600)
-    # axar = figar.gca()
-    # axar.plot(rVals, energyVals / energyVals.max(), color='0.1', lw=0.75, label='Energy')
-    # axar.plot(rVals, gradVals / gradVals.max(), color='0.5', lw=0.75, alpha=0.5, label='Gradient')
-    # axar.scatter(rBound, gradVals[rindx] / gradVals.max(), marker='o', s=7, c='w', lw=0.5, edgecolors='0.1')
-    # axar.set_ylim([-0.25, 1.25])
-    # axar.set_yticks(np.arange(0, 1.1, 0.25))
-    # axar.legend(ncol=2, handlelength=1, loc='upper center')
-    #
-    # figz = plt.figure(figsize=(2, 2), dpi=600)
-    # axz = figz.gca()
-    # axz.imshow(imgzFTlog, cmap='magma')
-    # xc, yc = np.asarray(imgzFT.shape) // 2
-    # angle = np.deg2rad(np.arange(0, 360))
-    # x, y = xc + rBound * np.cos(angle), yc + rBound * np.sin(angle)
-    # axz.plot(x, y, color='0.95', lw=0.5)
-    # # plt.show()
-    # figar.savefig(os.path.join(outDir, imgName+'_z_energy.tiff'))
-    # figz.savefig(os.path.join(outDir, imgName+'_z_spectrum.tiff'))
+    # print("Check: Total probability from theoretical ODF (phi) = ", np.sum(phiODF2_theo) * dphi)
     #
     # figb = plt.figure(figsize=(4, 2), dpi=300)
     # ax = figb.gca()
@@ -213,8 +183,10 @@ if __name__ == '__main__':
     # ax.set_xticklabels(phiBinsp[::30])
     # ax.legend(ncol=2, handlelength=1, loc='upper center')
     # figb.savefig(os.path.join(outDir, imgName + '_z_hist.tiff'))
-
-    # -----------------------------------------------------------------------------------------------------------------
+    #
+    # np.save(os.path.join(outDir, 'phiODF2'), phiODF2)
+    #
+    # # -----------------------------------------------------------------------------------------------------------------
     # FOURIER ANALYSIS OF X- or Y- PROJECTION
     # Fourier Transform
     imgaFT = imgfft(imga, windowName=windowName, zpad_factor=zpad_factor)
@@ -226,7 +198,7 @@ if __name__ == '__main__':
     rBounda = rVals[rindx]
 
     # Polar warp
-    alphaHistp, imgzFTpolar = polarFT_hist(imgaFT, rmin=int(fibdia * zpad_factor), rmax=rBounda)
+    alphaHistp, imgaFTpolar = polarFT_hist(imgaFT, rmin=int(fibdia * zpad_factor), rmax=rBounda)
     alphaHistp = np.roll(alphaHistp, -90)
     alphaBinsp = np.arange(0, 181, 1)
     alphaBinspc = 0.5 * (alphaBinsp[1:] + alphaBinsp[:-1])
@@ -237,61 +209,90 @@ if __name__ == '__main__':
     # dalphap = np.mean(alphaBinsp[1:] - alphaBinsp[:-1])
     print("Check: Total probability from FT ODF (alpha) = ", np.trapz(alphaODF2, alphaBinspc))
 
-    # phiBinsExtnd = np.arange(0, 361, dphi)
-    # phiHistExtnd = np.concatenate((phiHist / 2, phiHist / 2))
-    # msg = "len(phiBinsExtnd) = {0} while len(phiHistExtnd) = {1}".format(len(phiBinsExtnd), len(phiHistExtnd))
-    # assert len(phiBinsExtnd) == len(phiHistExtnd) + 1, print(msg)
-    #
-    # # Theoretical tensor and ODF from histogram
-    # Q2_theo, A2_theo = orient_tensor_2D(phiHist, phiBinc)
-    # phiODF2_theo = tensor2odf_2D(phiBinc, A2_theo) * 2 * np.pi / 180
-    # print("Check: Total probability from theoretical ODF = ", np.sum(phiODF2_theo) * dphi)
-    #
-    # # TODO: add axis labels to all figures.
-    # figar = plt.figure(figsize=(2, 2), dpi=600)
-    # axar = figar.gca()
-    # axar.plot(rVals, energyVals / energyVals.max(), color='0.1', lw=0.75, label='Energy')
-    # axar.plot(rVals, gradVals / gradVals.max(), color='0.5', lw=0.75, alpha=0.5, label='Gradient')
-    # axar.scatter(rBound, gradVals[rindx] / gradVals.max(), marker='o', s=7, c='w', lw=0.5, edgecolors='0.1')
-    # axar.set_ylim([-0.25, 1.25])
-    # axar.set_yticks(np.arange(0, 1.1, 0.25))
-    # axar.legend(ncol=2, handlelength=1, loc='upper center')
-    #
-    # figz = plt.figure(figsize=(2, 2), dpi=600)
-    # axz = figz.gca()
-    # axz.imshow(imgzFTlog, cmap='magma')
-    # xc, yc = np.asarray(imgzFT.shape) // 2
-    # angle = np.deg2rad(np.arange(0, 360))
-    # x, y = xc + rBound * np.cos(angle), yc + rBound * np.sin(angle)
-    # axz.plot(x, y, color='0.95', lw=0.5)
-    # # plt.show()
-    # figar.savefig(os.path.join(outDir, imgName + '_z_energy.tiff'))
-    # figz.savefig(os.path.join(outDir, imgName + '_z_spectrum.tiff'))
-    #
+    # TODO: add axis labels to all figures.
+    figara = plt.figure(figsize=(2, 2), dpi=600)
+    axara = figara.gca()
+    axara.plot(rVals, energyVals / energyVals.max(), color='0.1', lw=0.75, label='Energy')
+    axara.plot(rVals, gradVals / gradVals.max(), color='0.5', lw=0.75, alpha=0.5, label='Gradient')
+    axara.scatter(rBounda, gradVals[rindx] / gradVals.max(), marker='o', s=7, c='w', lw=0.5, edgecolors='0.1')
+    axara.set_ylim([-0.25, 1.25])
+    axara.set_yticks(np.arange(0, 1.1, 0.25))
+    axara.legend(ncol=2, handlelength=1, loc='upper center')
+
+
+    figa = plt.figure(figsize=(2, 2), dpi=600)
+    axa = figa.gca()
+    axa.imshow(imgaFTlog, cmap='magma')
+    xc, yc = np.asarray(imgaFT.shape) // 2
+    angle = np.deg2rad(np.arange(0, 360))
+    x, y = xc + rBounda * np.cos(angle), yc + rBounda * np.sin(angle)
+    axa.plot(x, y, color='0.95', lw=0.5)
+    # plt.show()
+
+    figara.savefig(os.path.join(outDir, imgName + '_{}_energy.tiff'.format(a)))
+    figa.savefig(os.path.join(outDir, imgName + '_{}_spectrum.tiff'.format(a)))
+
+
+    figb = plt.figure(figsize=(4, 2), dpi=300)
+    ax = figb.gca()
+    ax.bar(alphaBinsp[:-1], alphaHistp, width=1.0, align='edge', linewidth=0, alpha=0.5)
+    plt.plot(alphaBinspc, alphaODF2, color=np.asarray([230, 100, 20]) / 255, lw=0.75, linestyle='--', label='FT')
+    ax.set_xticks(alphaBinsp[::30])
+    ax.set_xticklabels(alphaBinsp[::30])
+    ax.legend(ncol=2, handlelength=1, loc='upper center')
+    figb.savefig(os.path.join(outDir, imgName + '_y_hist.tiff'))
+
+    np.save(os.path.join(outDir, 'alphaODF2'), alphaODF2)
+
     # -----------------------------------------------------------------------------------------------------------------
-    # ESTIMATION OF PDF OF THETA
+    # ESTIMATION OF TAN THETA
+    # Fibre Orientation (Histogram) used during generation of image.
+    thetaDF = pd.read_csv(os.path.join(dataDir, thtfName))  # read histogram data from CSV file.
+    thetaHist = thetaDF['thetaHist'].to_numpy()
+    thetaHist = thetaHist[:-1]
+
+    # Redundant code %%%%%%%%%%%%%%%%%%%%%%%%%
+    phiBinsp = np.arange(0, 181, 1)
+    phiBinspc = 0.5 * (phiBinsp[1:] + phiBinsp[:-1])
+    alphaBinsp = np.arange(0, 181, 1)
+    alphaBinspc = 0.5 * (alphaBinsp[1:] + alphaBinsp[:-1])
+
+
+    phiODF2 = np.load(os.path.join(outDir, 'phiODF2.npy'))
+    alphaODF2 = np.load(os.path.join(outDir, 'alphaODF2.npy'))
+    # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
     phiBinc = np.deg2rad(phiBinspc)
     cos_phiBinc = np.cos(phiBinc)
     cos_phiPMF = map_rv2cos(phiBinc, phiODF2 * 180 / np.pi, cos_phiBinc)
-    # cos_phiDistr = np.cos(phiDistr)
 
-    alpBinc = np.deg2rad(alphaBinspc-90)
+    alpBinc = np.deg2rad(alphaBinspc - 89)
+    print(alpBinc)
     tan_alpBinc = np.tan(alpBinc)
     tan_alpPMF = map_rv2tan(alpBinc, alphaODF2 * 180 / np.pi, tan_alpBinc)
-    # tan_alpDistr = np.tan(alpDistr)
 
     # Ratio distribution
     thtBinc = alpBinc
     tan_thtBinc = np.tan(thtBinc)
-    tan_thtPMF = ratio_distr(tan_alpBinc, cos_phiBinc[::-1], tan_alpBinc, tan_alpPMF, cos_phiPMF[::-1])
+    tan_thtPMF = ratio_distr(tan_alpBinc, cos_phiBinc[::-1], tan_thtBinc, tan_alpPMF, cos_phiPMF[::-1])
+    print("Total tan theta probability: ", np.trapz(tan_thtPMF, tan_thtBinc))
 
     thtPMF = map_rv2arctan(tan_thtBinc, tan_thtPMF, thtBinc)
 
-    # Fibre Orientation (Histogram) used during generation of image.
-    thetaDF = pd.read_csv(os.path.join(dataDir, thtfName))  # read histogram data from CSV file.
+    fig_cosphi = plt.figure()
+    ax = fig_cosphi.gca()
+    ax.plot(cos_phiBinc, cos_phiPMF)
+    fig_cosphi.savefig(os.path.join(outDir, 'cos_phi.tiff'))
 
-    thetaHist = thetaDF['thetaHist'].to_numpy()
-    thetaHist = thetaHist[:-1]
+    fig_tanalp = plt.figure()
+    ax = fig_tanalp.gca()
+    ax.plot(tan_alpBinc, tan_alpPMF)
+    fig_tanalp.savefig(os.path.join(outDir, 'tan_alp.tiff'))
+
+    fig_tantht = plt.figure()
+    ax= fig_tantht.gca()
+    ax.plot(tan_thtBinc, tan_thtPMF)
+    fig_tantht.savefig(os.path.join(outDir, 'tan_tht.tiff'))
 
     fig_tht2Distr = plt.figure(figsize=(2, 2))
     ax = fig_tht2Distr.gca()

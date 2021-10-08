@@ -16,7 +16,7 @@ from os import path
 import numpy as np
 import skimage.io as skio
 from skimage.transform import rotate
-from fibfourier import fourier_orient_tensor, fourier_orient_tensor_2order
+from fibfourier import fourier_orient_tensor
 from fiborient import theo_orient_tensor_2D
 
 outDir = "tests_FT_of_lines"

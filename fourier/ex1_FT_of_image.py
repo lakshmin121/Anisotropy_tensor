@@ -12,12 +12,7 @@ import numpy as np
 from matplotlib_settings import *
 from matplotlib import pyplot as plt
 from scipy.fftpack import fft2, fftshift
-from skimage import img_as_float
 from skimage.transform import rotate
-from skimage.filters import window
-# import skimage.io  as skio
-# from skimage import img_as_float, img_as_ubyte
-# from fiborient import orient_tensor_2D
 
 
 dataDir = "../data/test_images_1"

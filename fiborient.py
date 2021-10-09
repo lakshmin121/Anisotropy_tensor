@@ -10,6 +10,8 @@ SECONDORDER_SIZE_3D = 3
 FOURTHORDER_SIZE_3D = 9
 
 
+# TODO: change all angular arguments to radian units.
+
 def delta(i, j):
     if i==j:
         return 1
@@ -326,9 +328,18 @@ def delta(i, j):
         return 0
 
 
+def isiterable(var):
+    try:
+        it = iter(var)
+    except TypeError:
+        return False
+    return True
+
+
 def rotation_matrix_3D(rotAnglesDeg=(0, 0, 0), rotAnglesRad=None):  # Tested OK
     if rotAnglesRad is None:
         rotAnglesRad = np.deg2rad(rotAnglesDeg)
+    assert len(rotAnglesRad) == 3, ValueError("rotAnglesDeg or rotAnglesRad is not iterable of length 3.")
 
     rotMat = np.eye(3)
     for r, i, j in cycle_indices(3):
@@ -418,3 +429,43 @@ def rotate_joint_probability(refElvEdges, refAzmEdges, refProb,
     plt.colorbar(imgTransformed, orientation='horizontal')
 
     return p_psi_ups, psiCentres, upsCentres, fig
+
+
+def projdir_rotation_3D(thetaValsRad, phiValsRad, refdirRad=(0, 0)):
+    """
+    Returns the rotation matrix to transform the given projection direction
+    to a reference direction.
+    Reference: https://math.stackexchange.com/questions/180418/calculate-rotation-matrix-to-align-vector-a-to-vector-b-in-3d
+    :param thetaValsRad: Spherical coordinate - elevation.
+    :param phiValsRad: Spherical coordinate - azimuth
+    :return: rotation matrix to transform the given projection direction (theta, phi) to the reference direction,
+    global Z- axis <0, 0, 1> by default
+    """
+    if not isiterable(thetaValsRad):
+        thetaValsRad, phiValsRad = np.array([thetaValsRad]), np.array([phiValsRad])
+    assert len(thetaValsRad) == len(phiValsRad), ValueError("len(thetaValsRad) does not match len(phiValsRad).")
+    thetaref, phiref = refdirRad
+    cosphiref, sinphiref = np.cos(phiref), np.sin(phiref)
+    costhtref, sinthtref = np.cos(thetaref), np.sin(thetaref)
+    uref = np.array([sinthtref * cosphiref, sinthtref * sinphiref, costhtref])
+
+    cosphi, sinphi = np.cos(phiValsRad), np.sin(phiValsRad)
+    costht, sintht = np.cos(thetaValsRad), np.sin(thetaValsRad)
+    uvecs = np.zeros((len(thetaValsRad), 3))
+    uvecs[:, 0] = sintht * cosphi
+    uvecs[:, 1] = sintht * sinphi
+    uvecs[:, 2] = costht
+
+    rotaxs = np.cross(uvecs, uref)
+    cosrotangles = np.dot(uvecs, uref)
+
+    rotmats = np.zeros((len(thetaValsRad), 3, 3))
+    for i, cosang in enumerate(cosrotangles):
+        v = rotaxs[i, :]
+        c = cosang
+        vcross = np.cross(v, np.eye(v.shape[0]) * -1)
+        rotmats[i, :, :] = np.eye(3) \
+                           + vcross \
+                           + np.dot(vcross, vcross) / (1 + c)
+
+    return rotmats

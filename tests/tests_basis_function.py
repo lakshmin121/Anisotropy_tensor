@@ -54,12 +54,11 @@ print(F2ndOrder_2D_fromdef[:, :, randidx])
 print("\nAfter transposing: \n")
 Ftrans = F2ndOrder_2D.T
 print(Ftrans[randidx, :, :])
+print(Ftrans.shape)
 
 A = np.arange(9).reshape((3, 3))
 res1 = np.einsum('ij, ijk -> k', A, F2ndOrder_2D)
-res2 = A @ Ftrans
 print(res1[randidx])
-print(res2[randidx])
 
 #  Preprocess data if needed
 # Learning algorithm -

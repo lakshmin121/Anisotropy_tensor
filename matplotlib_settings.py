@@ -8,7 +8,7 @@ import matplotlib as mpl
 from matplotlib import pyplot as plt
 import seaborn as sns
 
-__version__ = '1.3'
+__version__ = '1.4'
 
 # units
 # 1 pt = 1/72 in = 0.353 mm
@@ -27,6 +27,18 @@ eql = 1.
 med = 1.5
 phi = 1.618  # golden ratio
 dbl = 2.
+
+ANGLE_TICK_LABELS_PI = ["0", "$\\frac{\pi}{6}$", "$\\frac{\pi}{3}$", "$\\frac{\pi}{2}$",
+                        "$\\frac{2\pi}{3}$", "$\\frac{5\pi}{6}$", "$\pi$"]
+ANGLE_TICK_LABELS_2PI = ["0", "$\\frac{\pi}{6}$", "$\\frac{\pi}{3}$", "$\\frac{\pi}{2}$",
+                         "$\\frac{2\pi}{3}$", "$\\frac{5\pi}{6}$", "$\pi$",
+                         "$\\frac{7\pi}{6}$", "$\\frac{4\pi}{3}$", "$\\frac{3\pi}{2}$",
+                         "$\\frac{5\pi}{3}$", "$\\frac{11\pi}{6}$", "$2\pi$"]
+ANGLE_TICK_LABELS_PIBY2 = ["0", "$\\frac{\pi}{6}$", "$\\frac{\pi}{3}$", "$\\frac{\pi}{2}$"]
+ANGLE_TICK_LABEL_DICT = {len(ANGLE_TICK_LABELS_PIBY2): ANGLE_TICK_LABELS_PIBY2,
+                         len(ANGLE_TICK_LABELS_PI): ANGLE_TICK_LABELS_PI,
+                         len(ANGLE_TICK_LABELS_2PI): ANGLE_TICK_LABELS_2PI
+                        }
 
 
 def set_fig_size(width=fig_width_sml, aspect_ratio=phi, rotated=False):

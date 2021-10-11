@@ -245,7 +245,7 @@ def FTbound(imageFT, step=1):
     xx, yy = np.meshgrid(xv, yv)
     rvals = np.arange(0, s // 2, step)
 
-    apool = Pool(processes=cpu_count() - 1)
+    apool = Pool(processes=cpu_count() - 2)
     area_vals = apool.map(partial(confined_energy, imageFT, xx, yy, xc, yc), rvals)
     area_vals = np.array(area_vals)
     # print(area_vals.shape)
@@ -263,6 +263,7 @@ def energy_boundary(imageFT, step=1):
     return ridx, rvals, energy, grad
 
 
+# TODO: Test 90 deg shift and 180 deg reflection of the histogram.
 def polarFT_hist(imageFT, rmin=None, rmax=None, correction=True):
     if rmin is None:
         rmin = 0
@@ -281,13 +282,21 @@ def polarFT_hist(imageFT, rmin=None, rmax=None, correction=True):
         excess = np.sum(imageFT[:rmin + 1])
         hist = hist * (1 + excess / histsum)  # approximate
         hist = hist / np.sum(hist)
-
+    hist = np.roll(hist, -90)
     return hist, imageFTpolar
 
 
 # TODO: include the effect of rmin, rmax? change estimation of wimgFT
 # TODO: Add docstring.
-def fourier_orient_tensor(image, windowName=None, order=2, zpad_factor=1, fibdia=1):
+def fourier_orient_hist(image, windowName=None, zpad_factor=1, fibdia=1):
+    """
+    Estimates fibre orientation histogram from FT of projected image.
+    :param image:
+    :param windowName:
+    :param zpad_factor:
+    :param fibdia:
+    :return:
+    """
     if image.ndim > 2:
         image = rgb2gray(image)
     image = img_as_float(image)
@@ -303,13 +312,19 @@ def fourier_orient_tensor(image, windowName=None, order=2, zpad_factor=1, fibdia
 
     # Polar warp
     rmin = min([int(fibdia * zpad_factor), int(round(np.pi * rBound / (50 * zpad_factor)))])
-    phiHistp, imgzFTpolar = polarFT_hist(wimgFT, rmin=rmin, rmax=rBound)
-    phiHistp = np.roll(phiHistp, -90)
-    phiBinsp = np.arange(0, 181, 1)
+    phiHist, imgzFTpolar = polarFT_hist(wimgFT, rmin=rmin, rmax=rBound)
+    phiBins = np.arange(0, 181, 1)
+
+    return phiHist, phiBins
+
+
+def fourier_orient_tensor(image, windowName=None, order=2, zpad_factor=1, fibdia=1):
+    phiHistp, phiBinsp = fourier_orient_hist(image, windowName=windowName,
+                                             zpad_factor=zpad_factor, fibdia=fibdia)
     phiBinspc = 0.5 * (phiBinsp[1:] + phiBinsp[:-1])
 
     # Tensor from FT
-    Qphi, Aphi = orient_tensor_2D(phiHistp, phiBinspc)
+    Qphi, Aphi = orient_tensor_2D(phiHistp, phiBinspc, order=order)
     # phiODF2 = tensor2odf_2D(phiBinspc, Aphi) * 2 * np.pi / 180
     # # dphip = np.mean(phiBinsp[1:] - phiBinsp[:-1])
     # print("Check: Total probability from FT ODF (phi) = ", np.trapz(phiODF2, phiBinspc))

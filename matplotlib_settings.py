@@ -28,16 +28,28 @@ med = 1.5
 phi = 1.618  # golden ratio
 dbl = 2.
 
-ANGLE_TICK_LABELS_PI = ["0", "$\\frac{\pi}{6}$", "$\\frac{\pi}{3}$", "$\\frac{\pi}{2}$",
-                        "$\\frac{2\pi}{3}$", "$\\frac{5\pi}{6}$", "$\pi$"]
-ANGLE_TICK_LABELS_2PI = ["0", "$\\frac{\pi}{6}$", "$\\frac{\pi}{3}$", "$\\frac{\pi}{2}$",
-                         "$\\frac{2\pi}{3}$", "$\\frac{5\pi}{6}$", "$\pi$",
-                         "$\\frac{7\pi}{6}$", "$\\frac{4\pi}{3}$", "$\\frac{3\pi}{2}$",
-                         "$\\frac{5\pi}{3}$", "$\\frac{11\pi}{6}$", "$2\pi$"]
-ANGLE_TICK_LABELS_PIBY2 = ["0", "$\\frac{\pi}{6}$", "$\\frac{\pi}{3}$", "$\\frac{\pi}{2}$"]
-ANGLE_TICK_LABEL_DICT = {len(ANGLE_TICK_LABELS_PIBY2): ANGLE_TICK_LABELS_PIBY2,
-                         len(ANGLE_TICK_LABELS_PI): ANGLE_TICK_LABELS_PI,
-                         len(ANGLE_TICK_LABELS_2PI): ANGLE_TICK_LABELS_2PI
+ANGLE_TICK_LABELS_0_PI = ["0", "$\\frac{\pi}{6}$", "$\\frac{\pi}{3}$", "$\\frac{\pi}{2}$",
+                          "$\\frac{2\pi}{3}$", "$\\frac{5\pi}{6}$", "$\pi$"]  # [0, pi]
+
+ANGLE_TICK_LABELS_0_2PI = ["0", "$\\frac{\pi}{6}$", "$\\frac{\pi}{3}$", "$\\frac{\pi}{2}$",
+                           "$\\frac{2\pi}{3}$", "$\\frac{5\pi}{6}$", "$\pi$",
+                           "$\\frac{7\pi}{6}$", "$\\frac{4\pi}{3}$", "$\\frac{3\pi}{2}$",
+                           "$\\frac{5\pi}{3}$", "$\\frac{11\pi}{6}$", "$2\pi$"]  # [0, 2pi]
+
+ANGLE_TICK_LABELS_0_PIBY2 = ["0", "$\\frac{\pi}{6}$", "$\\frac{\pi}{3}$", "$\\frac{\pi}{2}$"]  # [0, pi/2]
+
+ANGLE_TICK_LABELS_nPIBY2 = ["$\\frac{-\pi}{2}$", "$\\frac{-\pi}{3}$", "$\\frac{-\pi}{6}$", "0",
+                            "$\\frac{\pi}{6}$", "$\\frac{\pi}{3}$", "$\\frac{\pi}{2}$"]  # [-pi/2, pi/2]
+
+ANGLE_TICK_LABELS_nPI = ["$-\pi$", "$\\frac{-5\pi}{6}$", "$\\frac{-2\pi}{3}$", "$\\frac{-\pi}{6}$", "0",
+                         "$\\frac{\pi}{6}$", "$\\frac{\pi}{3}$", "$\\frac{\pi}{2}$", "$\\frac{2\pi}{3}$",
+                         "$\\frac{5\pi}{6}$", "$\pi$"]  # [-pi, pi]
+
+ANGLE_TICK_LABEL_DICT = {len(ANGLE_TICK_LABELS_0_PIBY2): ANGLE_TICK_LABELS_0_PIBY2,
+                         len(ANGLE_TICK_LABELS_0_PI): ANGLE_TICK_LABELS_0_PI,
+                         len(ANGLE_TICK_LABELS_0_2PI): ANGLE_TICK_LABELS_0_2PI,
+                         -len(ANGLE_TICK_LABELS_nPIBY2): ANGLE_TICK_LABELS_nPIBY2,
+                         -len(ANGLE_TICK_LABELS_nPI): ANGLE_TICK_LABELS_nPI
                         }
 
 

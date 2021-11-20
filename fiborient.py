@@ -257,18 +257,16 @@ def orient_tensor_3D(probThetaPhi, thetaValsRad, phiValsRad, order=2):
 
     # --------------------------------------------------------------------
     # Set-up
-    coords = (0, 1, 2)  # possible coordinates in 2D space
+    coords = (0, 1, 2)  # possible coordinates in 3D space
     base = tuple([coords] * order)  # tensor space dimension = coords * order
     indices = list(product(*base))  # all possible tensor indices Qijkl
-    # dphi = np.mean(np.diff(phiValsRad))
-    # dtht = np.mean(np.diff(thetaValsRad))
     order_size = int(np.sqrt(len(coords) ** order))
 
     # unit vectors: direction cosines:
     uvec = np.zeros((3, len(thetaValsRad), len(phiValsRad)))
-    uvec[0, :, :] = np.outer(np.sin(thetaValsRad), np.cos(phiValsRad))
-    uvec[1, :, :] = np.outer(np.sin(thetaValsRad), np.sin(phiValsRad))
-    uvec[2, :, :] = np.outer(np.cos(thetaValsRad), np.ones(len(phiValsRad)))
+    uvec[0, :, :] = np.outer(np.cos(phiValsRad), np.sin(thetaValsRad))
+    uvec[1, :, :] = np.outer(np.sin(phiValsRad), np.sin(thetaValsRad))
+    uvec[2, :, :] = np.outer(np.ones(len(phiValsRad)), np.cos(thetaValsRad))
 
     assert uvec[0].shape == probThetaPhi.shape, \
         ValueError("Shapes of joint probability {0} and unit-vector {1} does not match.".format(uvec[0].shape,
@@ -277,10 +275,10 @@ def orient_tensor_3D(probThetaPhi, thetaValsRad, phiValsRad, order=2):
     Q = []
     for indx in indices:
         # print("index: ", indx)
-        elem = probThetaPhi
+        elem = probThetaPhi.T  # if not transposed, row -> theta
         for i in indx:
-            elem = elem * uvec[i, :]
-        Q.append(np.trapz(np.trapz(elem, thetaValsRad, axis=0), phiValsRad, axis=-1))
+            elem = elem * uvec[i, :, :]
+        Q.append(np.trapz(np.trapz(elem, thetaValsRad, axis=-1), phiValsRad))
     Q = np.array(Q).reshape((order_size, order_size))  # * dphi * dtht
 
     if order==2:
@@ -326,14 +324,6 @@ def delta(i, j):
         return 1
     else:
         return 0
-
-
-def isiterable(var):
-    try:
-        it = iter(var)
-    except TypeError:
-        return False
-    return True
 
 
 def rotation_matrix_3D(rotAnglesDeg=(0, 0, 0), rotAnglesRad=None):  # Tested OK
@@ -429,43 +419,3 @@ def rotate_joint_probability(refElvEdges, refAzmEdges, refProb,
     plt.colorbar(imgTransformed, orientation='horizontal')
 
     return p_psi_ups, psiCentres, upsCentres, fig
-
-
-def projdir_rotation_3D(thetaValsRad, phiValsRad, refdirRad=(0, 0)):
-    """
-    Returns the rotation matrix to transform the given projection direction
-    to a reference direction.
-    Reference: https://math.stackexchange.com/questions/180418/calculate-rotation-matrix-to-align-vector-a-to-vector-b-in-3d
-    :param thetaValsRad: Spherical coordinate - elevation.
-    :param phiValsRad: Spherical coordinate - azimuth
-    :return: rotation matrix to transform the given projection direction (theta, phi) to the reference direction,
-    global Z- axis <0, 0, 1> by default
-    """
-    if not isiterable(thetaValsRad):
-        thetaValsRad, phiValsRad = np.array([thetaValsRad]), np.array([phiValsRad])
-    assert len(thetaValsRad) == len(phiValsRad), ValueError("len(thetaValsRad) does not match len(phiValsRad).")
-    thetaref, phiref = refdirRad
-    cosphiref, sinphiref = np.cos(phiref), np.sin(phiref)
-    costhtref, sinthtref = np.cos(thetaref), np.sin(thetaref)
-    uref = np.array([sinthtref * cosphiref, sinthtref * sinphiref, costhtref])
-
-    cosphi, sinphi = np.cos(phiValsRad), np.sin(phiValsRad)
-    costht, sintht = np.cos(thetaValsRad), np.sin(thetaValsRad)
-    uvecs = np.zeros((len(thetaValsRad), 3))
-    uvecs[:, 0] = sintht * cosphi
-    uvecs[:, 1] = sintht * sinphi
-    uvecs[:, 2] = costht
-
-    rotaxs = np.cross(uvecs, uref)
-    cosrotangles = np.dot(uvecs, uref)
-
-    rotmats = np.zeros((len(thetaValsRad), 3, 3))
-    for i, cosang in enumerate(cosrotangles):
-        v = rotaxs[i, :]
-        c = cosang
-        vcross = np.cross(v, np.eye(v.shape[0]) * -1)
-        rotmats[i, :, :] = np.eye(3) \
-                           + vcross \
-                           + np.dot(vcross, vcross) / (1 + c)
-
-    return rotmats

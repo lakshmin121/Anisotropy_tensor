@@ -15,7 +15,7 @@ def uniform(domainDeg=(0, 180), size=None):
     return random.uniform(low=phiLow, high=phiHigh, size=size)
 
 
-def vonmises(muDeg=0.0, kappa=1.0, spreadDeg=180, size=None):
+def vonmises(muDeg=0.0, kappa=1.0, spreadDeg=180, size=None):  # TODO: wrong math. Needs change.
     randvals = random.vonmises(mu=0, kappa=kappa, size=size)  # values between [-pi, pi] centred at 0.
     factor = spreadDeg / 360
     phivals = factor * np.rad2deg(randvals) + muDeg

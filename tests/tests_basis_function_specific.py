@@ -12,9 +12,6 @@ import os
 import sys
 import numpy as np
 sys.path.append('..')
-# from glob import glob
-from itertools import product
-import pandas as pd
 from odffit import basisfunc_3D, basisfunc_proj, projdir_rotation_3D
 from matplotlib_settings import *
 from scipy.stats import mode
@@ -207,8 +204,18 @@ def test_basis_function(phiSamples, thtSamples, nbins=36,
     #     alphProb4 = np.flip(alphProb4)
 
     ax = alphFig.gca()
-    ax.plot(alphVals, alphProb2 * nbins / np.pi, label='$2^{nd}$ order')
-    ax.plot(alphVals, alphProb4 * nbins / np.pi, ls='dashed', label='$4^{th}$ order')
+    # ax.plot(alphVals, alphProb2 * nbins / np.pi, label='$2^{nd}$ order')  # in the case when probability is delta func
+    # ax.plot(alphVals, alphProb4 * nbins / np.pi, ls='dashed', label='$4^{th}$ order')
+    ax.plot(alphVals, alphProb2, label='$2^{nd}$ order')
+    ax.plot(alphVals, alphProb4, ls='dashed', label='$4^{th}$ order')
     # ax.legend(loc='upper right')
 
-    return jointProbFig, thtFig, phiFig, alphFig, biasPhi, biasTht
+    # Error
+    f2 = interp1d(alphVals, alphProb2)
+    f4 = interp1d(alphVals, alphProb2)
+    alphBinc = 0.5 * (alphBins[1:] + alphBins[:-1])
+    m = len(alphBinc)
+    rmserr2 = np.linalg.norm(alphHist - f2(alphBinc)) / m
+    rmserr4 = np.linalg.norm(alphHist - f4(alphBinc)) / m
+
+    return jointProbFig, thtFig, phiFig, alphFig, biasPhi, biasTht, rmserr2, rmserr4

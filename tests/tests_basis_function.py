@@ -12,7 +12,7 @@ import numpy as np
 sys.path.append('..')
 # from glob import glob
 # from itertools import product
-# import pandas as pd
+import pandas as pd
 # from odffit import basisfunc_3D, basisfunc_proj
 # from matplotlib_settings import *
 # from fiborient import orient_tensor_3D
@@ -21,13 +21,83 @@ from tests_basis_function_specific import test_basis_function
 orig_stdout = sys.stdout
 
 # # ---------------------------------------------------------------------------
-# TEST TYPE - 2
+# # TEST TYPE - 2
+#
+# teststring = "TEST-Type-2: Planar isotropic distribution of fibres,\n" +\
+# "\t p(theta, phi) = delta(theta - theta_0) / pi \n" +\
+# "Then, by projecting to XY-plane (phi-plane), \n" +\
+# "        p(phi) = 1/pi \n " +\
+# "Several tests to be performed by varying: theta_0."
+#
+# outDir = os.path.join("tests_basis_function", "Type-2")
+# if not os.path.exists(outDir):
+#         os.mkdir(outDir)
+#
+# f = open(os.path.join(outDir, 'test_summary.txt'), 'w+')
+# sys.stdout = f
+# print(teststring)
+#
+# # Generating data:
+# Ntests = 5
+# Nsamples = 1000
+# nPoints = 180
+#
+# # phi follows uniform distribution
+# phiSamples = np.random.uniform(-np.pi/2, np.pi/2, size=Nsamples)  # values between [-pi/2, pi/2)
+# # theta is same for all fibres
+# thtSamples = np.ones(Nsamples)
+# thtChoices = np.random.uniform(-np.pi/3, np.pi/3, size=Ntests)
+#
+# # Projection settings
+# refdirRad = (0, 0)
+# upsDomainRad = (0, np.pi)
+# psiDomainRad = (0, np.pi)
+# projdir = (0, 0)  # using value passed to this function
+#
+# rmserrs2 = []
+# rmserrs4 = []
+#
+# for testno in range(Ntests):
+#         fpath = os.path.join(outDir, 'test-' + str(testno+1))
+#         theta0 = thtChoices[testno]
+#         print("\n\nTest - ", testno)
+#         print("theta0 = ", theta0)  # value of theta
+#
+#         result = test_basis_function(phiSamples, thtSamples * theta0, nbins=36,
+#                                      projdir=projdir, upsDomainRad=upsDomainRad, psiDomainRad=psiDomainRad,
+#                                      nUps=nPoints, nPsi=nPoints, refdirRad=refdirRad
+#                                      )
+#         jointProbFig, thtFig, phiFig, alphFig, biasPhi, biasTht, rmserr2, rmserr4 = result
+#         rmserrs2.append(rmserr2)
+#         rmserrs4.append(rmserr4)
+#
+#         # print all stats to the figure as text for verification.
+#         info = "$\phi ~ U(-\pi/2, \pi/2)$"\
+#                 + "\n$\\theta = " + str(theta0)
+#
+#         jointProbFig.text(0.8, 0.5, info, fontsize=9)
+#         jointProbFig.savefig(fpath+"_jointHist.tiff")
+#
+#         phiFig.savefig(fpath + "_phiHist.tiff")
+#         thtFig.savefig(fpath + "_thtHist.tiff")
+#         alphFig.savefig(fpath + "_alphHist.tiff")
+#
+# columns = ['theta0', 'rms err 2nd', 'rms err 4th']
+# summaryDF = pd.DataFrame(data=np.array([thtChoices.data, rmserrs2, rmserrs4]).T, columns=columns)
+# summaryDF.to_csv(os.path.join(outDir, "summary.csv"), index=False)
+#
+# f.close()
+# sys.stdout = orig_stdout
 
-teststring = "TEST-Type-2: Planar isotropic distribution of fibres,\n" +\
-"\t p(theta, phi) = delta(theta - theta_0) / pi \n" +\
+
+# ---------------------------------------------------------------------------
+# TEST TYPE - 1
+
+teststring = "TEST-Type-2: All fibres in same direction,\n" +\
+"\t p(theta, phi) = delta(theta - theta_0) delta(phi - phi_0) \n" +\
 "Then, by projecting to XY-plane (phi-plane), \n" +\
-"        p(phi) = 1/pi \n " +\
-"Several tests to be performed by varying: theta_0."
+"        p(phi) = delta(phi - phi_0) \n " +\
+"Several tests to be performed by varying: theta_0, phi_0"
 
 outDir = os.path.join("tests_basis_function", "Type-1")
 if not os.path.exists(outDir):
@@ -38,14 +108,15 @@ sys.stdout = f
 print(teststring)
 
 # Generating data:
-Ntests = 1
-Nsamples = 1000
+Ntests = 5
+Nsamples = 500
 nPoints = 180
 
 # phi follows uniform distribution
-phiSamples = np.random.uniform(-np.pi/2, np.pi/2, size=Nsamples)  # values between [-pi/2, pi/2)
+# phiSamples = np.random.uniform(-np.pi/2, np.pi/2, size=Nsamples)  # values between [-pi/2, pi/2)
 # theta is same for all fibres
 thtSamples = np.ones(Nsamples)
+phiChoices = np.random.uniform(-np.pi/3, np.pi/3, size=Ntests)
 thtChoices = np.random.uniform(-np.pi/3, np.pi/3, size=Ntests)
 
 # Projection settings
@@ -54,102 +125,48 @@ upsDomainRad = (0, np.pi)
 psiDomainRad = (0, np.pi)
 projdir = (0, 0)  # using value passed to this function
 
+rmserrs2 = []
+rmserrs4 = []
 for testno in range(Ntests):
         fpath = os.path.join(outDir, 'test-' + str(testno+1))
+        phi0 = phiChoices[testno]
         theta0 = thtChoices[testno]
         print("\n\nTest - ", testno)
         print("theta0 = ", theta0)  # value of theta
+        print("phi0 = ", phi0)  # value of phi
 
-        result = test_basis_function(phiSamples, thtSamples * theta0, nbins=36,
+        result = test_basis_function(thtSamples * phi0, thtSamples * theta0, nbins=36,
                                      projdir=projdir, upsDomainRad=upsDomainRad, psiDomainRad=psiDomainRad,
                                      nUps=nPoints, nPsi=nPoints, refdirRad=refdirRad
                                      )
-        jointProbFig, thtFig, phiFig, alphFig, biasPhi, biasTht = result
+        jointProbFig, thtFig, phiFig, alphFig, biasPhi, biasTht, rmserr2, rmserr4 = result
+        rmserrs2.append(rmserr2)
+        rmserrs4.append(rmserr4)
 
         # print all stats to the figure as text for verification.
-        info = "$\phi ~ U(-\pi/2, \pi/2)$"\
-                + "\n$\\theta = " + str(theta0)
+        info = "$\phi \~ U(-\pi/2, \pi/2)$"\
+                + "\n$\\theta$ = " + str(np.round(np.pi/2+theta0, 3))
 
         jointProbFig.text(0.8, 0.5, info, fontsize=9)
         jointProbFig.savefig(fpath+"_jointHist.tiff")
+
+        ax = alphFig.gca()
+        if phi0 < 0:
+                ax.legend(loc='upper right')
+        else:
+                ax.legend(loc='upper left')
 
         phiFig.savefig(fpath + "_phiHist.tiff")
         thtFig.savefig(fpath + "_thtHist.tiff")
         alphFig.savefig(fpath + "_alphHist.tiff")
 
+columns = ['theta0', 'phi0', 'rms err 2nd', 'rms err 4th']
+summaryDF = pd.DataFrame(data=np.array([thtChoices.data, phiChoices.data, rmserrs2, rmserrs4]).T, columns=columns)
+summaryDF.to_csv(os.path.join(outDir, "summary.csv"), index=False)
+
 f.close()
 sys.stdout = orig_stdout
 
-
-# ---------------------------------------------------------------------------
-# # TEST TYPE - 1
-#
-# teststring = "TEST-Type-2: All fibres in same direction,\n" +\
-# "\t p(theta, phi) = delta(theta - theta_0) delta(phi - phi_0) \n" +\
-# "Then, by projecting to XY-plane (phi-plane), \n" +\
-# "        p(phi) = delta(phi - phi_0) \n " +\
-# "Several tests to be performed by varying: theta_0, phi_0"
-#
-# outDir = os.path.join("tests_basis_function", "Type-1")
-# if not os.path.exists(outDir):
-#         os.mkdir(outDir)
-#
-# f = open(os.path.join(outDir, 'test_summary.txt'), 'w+')
-# sys.stdout = f
-# print(teststring)
-#
-# # Generating data:
-# Ntests = 5
-# Nsamples = 500
-# nPoints = 180
-#
-# # phi follows uniform distribution
-# # phiSamples = np.random.uniform(-np.pi/2, np.pi/2, size=Nsamples)  # values between [-pi/2, pi/2)
-# # theta is same for all fibres
-# thtSamples = np.ones(Nsamples)
-# phiChoices = np.random.uniform(-np.pi/3, np.pi/3, size=Ntests)
-# thtChoices = np.random.uniform(-np.pi/3, np.pi/3, size=Ntests)
-#
-# # Projection settings
-# refdirRad = (0, 0)
-# upsDomainRad = (0, np.pi)
-# psiDomainRad = (0, np.pi)
-# projdir = (0, 0)  # using value passed to this function
-#
-# for testno in range(Ntests):
-#         fpath = os.path.join(outDir, 'test-' + str(testno+1))
-#         phi0 = phiChoices[testno]
-#         theta0 = thtChoices[testno]
-#         print("\n\nTest - ", testno)
-#         print("theta0 = ", theta0)  # value of theta
-#         print("phi0 = ", phi0)  # value of phi
-#
-#         result = test_basis_function(thtSamples * phi0, thtSamples * theta0, nbins=36,
-#                                      projdir=projdir, upsDomainRad=upsDomainRad, psiDomainRad=psiDomainRad,
-#                                      nUps=nPoints, nPsi=nPoints, refdirRad=refdirRad
-#                                      )
-#         jointProbFig, thtFig, phiFig, alphFig, biasPhi, biasTht = result
-#
-#         # print all stats to the figure as text for verification.
-#         info = "$\phi \~ U(-\pi/2, \pi/2)$"\
-#                 + "\n$\\theta$ = " + str(np.round(np.pi/2+theta0, 3))
-#
-#         jointProbFig.text(0.8, 0.5, info, fontsize=9)
-#         jointProbFig.savefig(fpath+"_jointHist.tiff")
-#
-#         ax = alphFig.gca()
-#         if phi0 < 0:
-#                 ax.legend(loc='upper right')
-#         else:
-#                 ax.legend(loc='upper left')
-#
-#         phiFig.savefig(fpath + "_phiHist.tiff")
-#         thtFig.savefig(fpath + "_thtHist.tiff")
-#         alphFig.savefig(fpath + "_alphHist.tiff")
-#
-# f.close()
-# sys.stdout = orig_stdout
-#
 
 # ---------------------------------------------------------------------------
 # fpath = os.path.join(outDir, "test1")

@@ -105,6 +105,7 @@ def projdir_rotation_3D(thetaValsRad, phiValsRad, refdirRad=(0, 0)):
 
     rotaxs = np.cross(uvecs, uref)
     cosrotangles = np.dot(uvecs, uref)
+    print("cosrotangles: ", cosrotangles)
 
     rotmats = np.zeros((len(thetaValsRad), 3, 3))
     for i, cosang in enumerate(cosrotangles):
@@ -158,12 +159,14 @@ def basisfunc_proj(projdir=(0, 0), upsDomainRad=(0, np.pi), psiDomainRad=(0, np.
         R = projdir_rotation_3D(projdir[0], projdir[1], refdirRad=refdirRad)
         print("Rotation matrix: \n", R)
         if order == 2:
-            Fproj_rottd = np.einsum('mi, nj, ijk -> mnk', R, R, Fproj)
+            Fproj_rottd = np.einsum('im, jn, ijk -> mnk', R, R, Fproj)
+            # Fproj_rottd = np.einsum('mi, nj, ijk -> mnk', R, R, Fproj)
         elif order==4:
             m, n, npoints = Fproj.shape
             assert (m, n) == (FOURTHORDER_SIZE_3D, FOURTHORDER_SIZE_3D), ValueError("shape of 4th order tensor must be 9x9")
             modshape = (SECONDORDER_SIZE_3D, SECONDORDER_SIZE_3D, SECONDORDER_SIZE_3D, SECONDORDER_SIZE_3D)
-            Fproj_rottd = np.einsum('mi,nj,pk,ql,mnpqs->ijkls', R, R, R, R, Fproj.reshape((*modshape, npoints)))
+            Fproj_rottd = np.einsum('im, jn, kp, lq,mnpqs->ijkls', R, R, R, R, Fproj.reshape((*modshape, npoints)))
+            # Fproj_rottd = np.einsum('mi, nj, pk, ql,mnpqs->ijkls', R, R, R, R, Fproj.reshape((*modshape, npoints)))
             Fproj_rottd = Fproj_rottd.reshape(Fproj.shape)
         else:
             raise NotImplementedError

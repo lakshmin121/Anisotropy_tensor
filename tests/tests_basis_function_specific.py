@@ -68,7 +68,7 @@ def joint_probability(thetaVals, phiVals, nbins=180,
     return jointProb.T, xEdges, yEdges, fig
 
 
-def alpha(thetaRad, phiRad, projdir):
+def alpha(thetaRad, phiRad, projdir, refdirRad):
     """Estimate the orientation of individual fibres, alpha, on the projection plane from their global orientations
     and rotation matrix corresponding to projection direction."""
     assert len(thetaRad) == len(phiRad)
@@ -79,12 +79,18 @@ def alpha(thetaRad, phiRad, projdir):
     uvecs[0, :] = sintht * cosphi
     uvecs[1, :] = sintht * sinphi
     uvecs[2, :] = costht
+    print("uvecs: ", uvecs)
 
-    R = projdir_rotation_3D(projdir[0], projdir[1])
+    R = projdir_rotation_3D(projdir[0], projdir[1], refdirRad=refdirRad)
     print("\nR: \n", R)
 
     uvecp = np.einsum('ij, jk -> ik', R, uvecs)  # transforming to fib dir on proj plane
-    alphaRad = np.arctan2(uvecp[1, :], uvecp[0, :])
+    print("uvecp: ", uvecp)
+    # alphaRad = np.arcsin(uvecp[1, :] / np.sqrt(1 - uvecp[2, :]**2))
+    alphaRad = np.arctan2(uvecp[1, :], uvecp[0, :]) - np.pi/2  # alpha in (-pi, pi)
+    # # Enforcing symmetry
+    alphaRad = np.where(alphaRad > np.pi/2, alphaRad - np.pi, alphaRad)
+    alphaRad = np.where(alphaRad < -np.pi/2, alphaRad + np.pi, alphaRad)
     return alphaRad
 
 
@@ -112,7 +118,7 @@ def lsfit_score(hist, curve):
 
 def test_basis_function(phiSamples, thtSamples, nbins=36,
                         projdir=(0, 0), upsDomainRad=(0, np.pi), psiDomainRad=(0, np.pi),
-                        nUps=180, nPsi=180, order=2, refdirRad=(0, 0)
+                        nUps=180, nPsi=180, refdirRad=(0, 0)
                         ):
     # TODO: write all possible tests for basis function, projection, anisotropy tensor,
     # and ODF generates using their products.
@@ -136,8 +142,8 @@ def test_basis_function(phiSamples, thtSamples, nbins=36,
     print("Theta: min={0}\t max={1}\t mean={2}".format(thtSamples.min(), thtSamples.max(), thtBins[thtMode]))
 
     # Generating corresponding distribution on the projected plane
-    # alphSamples = np.arctan2(np.tan(thtSamples), np.cos(phiSamples))
-    alphSamples = alpha(thtSamplespos, phiSamplespos, projdir) - np.pi/2
+    # alphSamples = alpha(thtSamples, phiSamples, projdir, refdirRad)  # - np.pi/2
+    alphSamples = alpha(thtSamplespos, phiSamplespos, projdir, refdirRad)  # - np.pi/2
     print("alpha: min: {0}\t max: {1}".format(np.min(alphSamples), np.max(alphSamples)))
     alphVals = np.linspace(-np.pi/2, np.pi/2, nPoints, endpoint=True)
     alphFig, alphHist, alphBins  = plot_hist(alphSamples, (-np.pi/2, np.pi/2), nbins)
@@ -159,8 +165,12 @@ def test_basis_function(phiSamples, thtSamples, nbins=36,
     eigvecs = eigvecs[:, indcs]
     biasvec = eigvecs[:, -1]
     biasvec = np.sign(biasvec[0]) * biasvec / np.linalg.norm(biasvec)
-    biasTht = np.arctan2(np.sign(biasvec[0])*np.sign(biasvec[1])*np.sqrt(biasvec[0]**2 + biasvec[1]**2) / biasvec[-1], 1)
-    biasPhi = np.arctan2(biasvec[1] / biasvec[0], 1)
+    try:
+        biasTht = np.arctan2(np.sign(biasvec[0])*np.sign(biasvec[1])*np.sqrt(biasvec[0]**2 + biasvec[1]**2) / biasvec[-1], 1)
+        biasPhi = np.arctan2(biasvec[1] / biasvec[0], 1)
+    except TypeError:
+        biasTht = 0
+        biasPhi = 0
     if biasPhi < 0:
         biasPhi = np.pi + biasPhi
     if biasTht < 0:
@@ -188,8 +198,8 @@ def test_basis_function(phiSamples, thtSamples, nbins=36,
     print("\t2nd order: ", totalProb2)
     print("\t4th order: ", totalProb4)
 
-    # alphProb2 = alphProb2 / totalProb2
-    # alphProb4 = alphProb4 / totalProb4
+    alphProb2 = alphProb2 / totalProb2
+    alphProb4 = alphProb4 / totalProb4
 
     # ls2 = lsfit_score(alphHist, alphProb2)
     # ls2rev = lsfit_score(alphHist, np.flip(alphProb2))
@@ -204,10 +214,12 @@ def test_basis_function(phiSamples, thtSamples, nbins=36,
     #     alphProb4 = np.flip(alphProb4)
 
     ax = alphFig.gca()
-    # ax.plot(alphVals, alphProb2 * nbins / np.pi, label='$2^{nd}$ order')  # in the case when probability is delta func
-    # ax.plot(alphVals, alphProb4 * nbins / np.pi, ls='dashed', label='$4^{th}$ order')
-    ax.plot(alphVals, alphProb2, label='$2^{nd}$ order')
-    ax.plot(alphVals, alphProb4, ls='dashed', label='$4^{th}$ order')
+    if len(phiSamples) == 1:
+        ax.plot(alphVals, alphProb2 * nbins / np.pi, label='$2^{nd}$ order')  # in the case when probability is delta func
+        ax.plot(alphVals, alphProb4 * nbins / np.pi, ls='dashed', label='$4^{th}$ order')
+    else:
+        ax.plot(alphVals, alphProb2, label='$2^{nd}$ order')
+        ax.plot(alphVals, alphProb4, ls='dashed', label='$4^{th}$ order')
     # ax.legend(loc='upper right')
 
     # Error

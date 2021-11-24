@@ -229,7 +229,7 @@ def joint_probability_3D(thetaVals, phiVals, step=np.deg2rad(5)):
     return jointProb.T, xEdges, yEdges, fig
 
 
-def orient_tensor_3D(probThetaPhi, thetaValsRad, phiValsRad, order=2):
+def orient_tensor_3D(probThetaPhi, thetaValsRad, phiValsRad, phiDomainRad=(0, np.pi), thetaDomainRad=(0, np.pi), order=2):
     # --------------------------------------------------------------------
     # Input Checks
     m, n = probThetaPhi.shape
@@ -263,10 +263,16 @@ def orient_tensor_3D(probThetaPhi, thetaValsRad, phiValsRad, order=2):
     order_size = int(np.sqrt(len(coords) ** order))
 
     # unit vectors: direction cosines:
-    uvec = np.zeros((3, len(thetaValsRad), len(phiValsRad)))
-    uvec[0, :, :] = np.outer(np.cos(phiValsRad), np.sin(thetaValsRad))
-    uvec[1, :, :] = np.outer(np.sin(phiValsRad), np.sin(thetaValsRad))
-    uvec[2, :, :] = np.outer(np.ones(len(phiValsRad)), np.cos(thetaValsRad))
+    uvec = np.zeros((3, len(phiValsRad), len(thetaValsRad)))
+    if phiDomainRad == (0, np.pi) and thetaDomainRad == (0, np.pi):
+        uvec[0, :, :] = np.outer(np.cos(phiValsRad), np.sin(thetaValsRad))
+        uvec[1, :, :] = np.outer(np.sin(phiValsRad), np.sin(thetaValsRad))
+        uvec[2, :, :] = np.outer(np.ones(len(phiValsRad)), np.cos(thetaValsRad))
+    elif phiDomainRad == (-np.pi/2, np.pi/2) and thetaDomainRad == (-np.pi/2, np.pi/2):
+        uvec[0, :, :] = np.outer(np.cos(phiValsRad), np.cos(thetaValsRad))
+        uvec[1, :, :] = np.outer(np.sin(phiValsRad), np.cos(thetaValsRad))
+        uvec[2, :, :] = np.outer(np.ones(len(phiValsRad)), np.sin(thetaValsRad))
+
 
     assert uvec[0].shape == probThetaPhi.shape, \
         ValueError("Shapes of joint probability {0} and unit-vector {1} does not match.".format(uvec[0].shape,

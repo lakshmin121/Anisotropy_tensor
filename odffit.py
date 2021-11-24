@@ -29,9 +29,14 @@ def basisfunc_3D(phiDomainRad=(0, np.pi),
     order_size = int(np.sqrt(len(coords) ** order))
 
     uvec = np.zeros((len(coords), nPhi, nTheta))
-    uvec[0, :, :] = np.outer(np.cos(phiVals), np.sin(thtVals))
-    uvec[1, :, :] = np.outer(np.sin(phiVals), np.sin(thtVals))
-    uvec[2, :, :] = np.outer(np.ones(nPhi), np.cos(thtVals))
+    if phiDomainRad == (0, np.pi) and thetaDomainRad == (0, np.pi):
+        uvec[0, :, :] = np.outer(np.cos(phiVals), np.sin(thtVals))
+        uvec[1, :, :] = np.outer(np.sin(phiVals), np.sin(thtVals))
+        uvec[2, :, :] = np.outer(np.ones(nPhi), np.cos(thtVals))
+    elif phiDomainRad == (-np.pi/2, np.pi/2) and thetaDomainRad == (-np.pi/2, np.pi/2):
+        uvec[0, :, :] = np.outer(np.cos(phiVals), np.cos(thtVals))
+        uvec[1, :, :] = np.outer(np.sin(phiVals), np.cos(thtVals))
+        uvec[2, :, :] = np.outer(np.ones(nPhi), np.sin(thtVals))
 
     Q = []
     for indx in indices:
@@ -120,8 +125,8 @@ def projdir_rotation_3D(thetaValsRad, phiValsRad, refdirRad=(0, 0)):
 
 
 # TODO: test this using alpha_xz
-def basisfunc_proj(projdir=(0, 0), upsDomainRad=(0, np.pi), psiDomainRad=(0, np.pi),
-                 nUps=180, nPsi=180, order=2, refdirRad=(0, 0)):
+def basisfunc_proj(projRotMat, upsDomainRad=(0, np.pi), psiDomainRad=(0, np.pi),
+                 nUps=180, nPsi=180, order=2):
     F3D, Q3D = basisfunc_3D(phiDomainRad=upsDomainRad, thetaDomainRad=psiDomainRad,
                             nPhi=nUps, nTheta=nPsi, order=order)
     # Check F3D:
@@ -152,22 +157,23 @@ def basisfunc_proj(projdir=(0, 0), upsDomainRad=(0, np.pi), psiDomainRad=(0, np.
     traceFproj = np.trace(Fproj, axis1=0, axis2=1)
     print("Check trace of Fproj local: ", np.all(np.isclose(traceFproj, np.zeros(traceFproj.shape))))
 
-    if projdir == refdirRad:
-        return Fproj
-    else:
+    # if projdir == refdirRad:
+    #     return Fproj
+    # else:
         # R is rotation matrix
-        R = projdir_rotation_3D(projdir[0], projdir[1], refdirRad=refdirRad)
-        print("Rotation matrix: \n", R)
-        if order == 2:
-            Fproj_rottd = np.einsum('im, jn, ijk -> mnk', R, R, Fproj)
-            # Fproj_rottd = np.einsum('mi, nj, ijk -> mnk', R, R, Fproj)
-        elif order==4:
-            m, n, npoints = Fproj.shape
-            assert (m, n) == (FOURTHORDER_SIZE_3D, FOURTHORDER_SIZE_3D), ValueError("shape of 4th order tensor must be 9x9")
-            modshape = (SECONDORDER_SIZE_3D, SECONDORDER_SIZE_3D, SECONDORDER_SIZE_3D, SECONDORDER_SIZE_3D)
-            Fproj_rottd = np.einsum('im, jn, kp, lq,mnpqs->ijkls', R, R, R, R, Fproj.reshape((*modshape, npoints)))
-            # Fproj_rottd = np.einsum('mi, nj, pk, ql,mnpqs->ijkls', R, R, R, R, Fproj.reshape((*modshape, npoints)))
-            Fproj_rottd = Fproj_rottd.reshape(Fproj.shape)
-        else:
-            raise NotImplementedError
-        return Fproj_rottd
+    # R = projdir_rotation_3D(projdir[0], projdir[1], refdirRad=refdirRad)
+    # print("Rotation matrix: \n", R)
+    R = projRotMat
+    if order == 2:
+        # Fproj_rottd = np.einsum('im, jn, ijk -> mnk', R, R, Fproj)
+        Fproj_rottd = np.einsum('mi, nj, ijk -> mnk', R, R, Fproj)
+    elif order==4:
+        m, n, npoints = Fproj.shape
+        assert (m, n) == (FOURTHORDER_SIZE_3D, FOURTHORDER_SIZE_3D), ValueError("shape of 4th order tensor must be 9x9")
+        modshape = (SECONDORDER_SIZE_3D, SECONDORDER_SIZE_3D, SECONDORDER_SIZE_3D, SECONDORDER_SIZE_3D)
+        # Fproj_rottd = np.einsum('im, jn, kp, lq,mnpqs->ijkls', R, R, R, R, Fproj.reshape((*modshape, npoints)))
+        Fproj_rottd = np.einsum('mi, nj, pk, ql,mnpqs->ijkls', R, R, R, R, Fproj.reshape((*modshape, npoints)))
+        Fproj_rottd = Fproj_rottd.reshape(Fproj.shape)
+    else:
+        raise NotImplementedError
+    return Fproj_rottd

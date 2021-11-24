@@ -68,29 +68,38 @@ def joint_probability(thetaVals, phiVals, nbins=180,
     return jointProb.T, xEdges, yEdges, fig
 
 
-def alpha(thetaRad, phiRad, projdir, refdirRad):
+def alpha(thetaRad, phiRad, R):
     """Estimate the orientation of individual fibres, alpha, on the projection plane from their global orientations
     and rotation matrix corresponding to projection direction."""
     assert len(thetaRad) == len(phiRad)
+    # thetaRad = thetaRad.astype(np.float32)
+    # phiRad = phiRad.astype(np.float32)
     cosphi, sinphi = np.cos(phiRad), np.sin(phiRad)
     costht, sintht = np.cos(thetaRad), np.sin(thetaRad)
 
+    # uvecs = np.zeros((3, len(thetaRad)))  # Global fibre directions
+    # uvecs[0, :] = sintht * cosphi
+    # uvecs[1, :] = sintht * sinphi
+    # uvecs[2, :] = costht
+    # print("uvecs: ", uvecs)
+
     uvecs = np.zeros((3, len(thetaRad)))  # Global fibre directions
-    uvecs[0, :] = sintht * cosphi
-    uvecs[1, :] = sintht * sinphi
-    uvecs[2, :] = costht
+    uvecs[0, :] = costht * cosphi
+    uvecs[1, :] = costht * sinphi
+    uvecs[2, :] = sintht
     print("uvecs: ", uvecs)
 
-    R = projdir_rotation_3D(projdir[0], projdir[1], refdirRad=refdirRad)
-    print("\nR: \n", R)
+    # R = projdir_rotation_3D(projdir[0], projdir[1], refdirRad=refdirRad)
+    # print("\nR: \n", R)
 
     uvecp = np.einsum('ij, jk -> ik', R, uvecs)  # transforming to fib dir on proj plane
     print("uvecp: ", uvecp)
     # alphaRad = np.arcsin(uvecp[1, :] / np.sqrt(1 - uvecp[2, :]**2))
-    alphaRad = np.arctan2(uvecp[1, :], uvecp[0, :]) - np.pi/2  # alpha in (-pi, pi)
-    # # Enforcing symmetry
+    alphaRad = np.arctan2(uvecp[1, :], uvecp[0, :]) #- np.pi/2  # alpha in (-pi, pi)
     alphaRad = np.where(alphaRad > np.pi/2, alphaRad - np.pi, alphaRad)
     alphaRad = np.where(alphaRad < -np.pi/2, alphaRad + np.pi, alphaRad)
+    alphaRad = 0.5 * (alphaRad + np.arcsin(uvecp[1, :] / np.sqrt(1 - uvecp[2, :]**2)))
+
     return alphaRad
 
 
@@ -116,9 +125,8 @@ def lsfit_score(hist, curve):
     return ls_score / np.min((lh, lc))
 
 
-def test_basis_function(phiSamples, thtSamples, nbins=36,
-                        projdir=(0, 0), upsDomainRad=(0, np.pi), psiDomainRad=(0, np.pi),
-                        nUps=180, nPsi=180, refdirRad=(0, 0)
+def test_basis_function(phiSamples, thtSamples, projRotMat, nbins=36,
+                        upsDomainRad=(0, np.pi), psiDomainRad=(0, np.pi), nUps=180, nPsi=180
                         ):
     # TODO: write all possible tests for basis function, projection, anisotropy tensor,
     # and ODF generates using their products.
@@ -142,20 +150,22 @@ def test_basis_function(phiSamples, thtSamples, nbins=36,
     print("Theta: min={0}\t max={1}\t mean={2}".format(thtSamples.min(), thtSamples.max(), thtBins[thtMode]))
 
     # Generating corresponding distribution on the projected plane
-    # alphSamples = alpha(thtSamples, phiSamples, projdir, refdirRad)  # - np.pi/2
-    alphSamples = alpha(thtSamplespos, phiSamplespos, projdir, refdirRad)  # - np.pi/2
+    # alphSamples = alpha(thtSamples, phiSamples, projRotMat, refdirRad)  # - np.pi/2
+    alphSamples = alpha(thtSamples, phiSamples, projRotMat)  # - np.pi/2
     print("alpha: min: {0}\t max: {1}".format(np.min(alphSamples), np.max(alphSamples)))
     alphVals = np.linspace(-np.pi/2, np.pi/2, nPoints, endpoint=True)
     alphFig, alphHist, alphBins  = plot_hist(alphSamples, (-np.pi/2, np.pi/2), nbins)
 
 
     # 3D DISTRIBUTION
-    jointProb, phiEdges, thtEdges, jointProbFig = joint_probability(thtSamplespos, phiSamplespos, nbins=nbins,
-                                                                    thetaDomainRad=(0, np.pi), phiDomainRad=(0, np.pi))
+    jointProb, phiEdges, thtEdges, jointProbFig = joint_probability(thtSamples, phiSamples, nbins=nbins,
+                                                                    thetaDomainRad=psiDomainRad,
+                                                                    phiDomainRad=upsDomainRad
+                                                                    )
     # check jointprob
     print("Total joint prob: ",  np.trapz(np.trapz(jointProb, phiEdges[:-1]), thtEdges[:-1]))
-    Q2, A2 = orient_tensor_3D(jointProb, thtEdges, phiEdges)
-    Q4, A4 = orient_tensor_3D(jointProb, thtEdges, phiEdges, order=4)
+    Q2, A2 = orient_tensor_3D(jointProb, thtEdges, phiEdges, thetaDomainRad=psiDomainRad, phiDomainRad=upsDomainRad)
+    Q4, A4 = orient_tensor_3D(jointProb, thtEdges, phiEdges, thetaDomainRad=psiDomainRad, phiDomainRad=upsDomainRad, order=4)
     # print("Q2:\n", Q2)
 
     # Direction of 3D orientation bias
@@ -183,10 +193,10 @@ def test_basis_function(phiSamples, thtSamples, nbins=36,
 
 
     # PROJECTION
-    Fproj2nd = basisfunc_proj(projdir=projdir, upsDomainRad=upsDomainRad, nPsi=nPsi, nUps=nUps,
-                              psiDomainRad=psiDomainRad, refdirRad=refdirRad)
-    Fproj4th = basisfunc_proj(projdir=projdir, upsDomainRad=upsDomainRad, nPsi=nPsi, nUps=nUps,
-                              psiDomainRad=psiDomainRad, refdirRad=refdirRad, order=4)
+    Fproj2nd = basisfunc_proj(projRotMat=projRotMat, upsDomainRad=upsDomainRad, nPsi=nPsi, nUps=nUps,
+                              psiDomainRad=psiDomainRad)
+    Fproj4th = basisfunc_proj(projRotMat=projRotMat, upsDomainRad=upsDomainRad, nPsi=nPsi, nUps=nUps,
+                              psiDomainRad=psiDomainRad, order=4)
 
     alphProb2 = 1/(4*np.pi) * (2 + (15/2) * np.einsum('ij, ijk -> k', A2, Fproj2nd)) * 2
     alphProb4 = alphProb2 + 1/(4*np.pi) * (315/8) * np.einsum('ij, ijk -> k', A4, Fproj4th) * 2
@@ -201,17 +211,17 @@ def test_basis_function(phiSamples, thtSamples, nbins=36,
     alphProb2 = alphProb2 / totalProb2
     alphProb4 = alphProb4 / totalProb4
 
-    # ls2 = lsfit_score(alphHist, alphProb2)
-    # ls2rev = lsfit_score(alphHist, np.flip(alphProb2))
-    # print(ls2, ls2rev)
-    # if ls2rev < ls2:
-    #     alphProb2 = np.flip(alphProb2)
-    #
-    # ls4 = lsfit_score(alphHist, alphProb4)
-    # ls4rev = lsfit_score(alphHist, np.flip(alphProb4))
-    # print(ls4, ls4rev)
-    # if ls4rev < ls4:
-    #     alphProb4 = np.flip(alphProb4)
+    ls2 = lsfit_score(alphHist, alphProb2)
+    ls2rev = lsfit_score(alphHist, np.flip(alphProb2))
+    print(ls2, ls2rev)
+    if ls2rev < ls2:
+        alphProb2 = np.flip(alphProb2)
+
+    ls4 = lsfit_score(alphHist, alphProb4)
+    ls4rev = lsfit_score(alphHist, np.flip(alphProb4))
+    print(ls4, ls4rev)
+    if ls4rev < ls4:
+        alphProb4 = np.flip(alphProb4)
 
     ax = alphFig.gca()
     if len(phiSamples) == 1:

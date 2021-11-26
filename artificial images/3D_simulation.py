@@ -18,7 +18,7 @@ from skimage.morphology import dilation, closing
 from skimage.filters import gaussian, median
 from matplotlib import pyplot as plt
 import orientation_probabilities as op
-from fiborient import orient_tensor_2D
+from fiborient import orient_tensor_2D, orient_tensor_3D
 from matplotlib_settings import *
 from skimage.morphology import ball
 from PyImModules.NCData import NCData
@@ -28,7 +28,7 @@ from skimage import img_as_ubyte, img_as_float
 ostart = time.time()
 
 # 1. INPUT
-outDir = "../data/art_images"
+outDir = "../data/art_images2"
 
 
 # Specimen and fibre properties:
@@ -40,32 +40,36 @@ fibdosage = 0.005
 
 # Orietation Distribution Function
 # phi
-# phiODF = 'uniform'
+phiODF = 'uniform'
 # phiDomainDeg = (0, 180)
 # phi_parameters = {}
-phiODF = 'vonmises'
+# phiODF = 'vonmises'
 m = 0
-kappa = [0.5, 1.0, 2.0]
+# kappa = [0.5, 1.0, 2.0]
+kappa = [0.5]
 
 for k1 in kappa:
     for k2 in kappa:
-        imgName = 'vf10_ar100_phivm_m0k{0}_thvm_m0k{1}'.format(k1, k2)
+        # imgName = 'vf10_ar100_phivm_m0k{0}_thvm_m0k{1}'.format(k1, k2)
+        imgName = 'vf10_ar100_phiuni_thsin'
         nc_fname = imgName + '.nc'
         txt_fname = imgName + '.txt'
 
-        phi_parameters = {'muDeg': m,
-                          'kappa': k1,
-                          'spreadDeg': 180}
+        # phi_parameters = {'muDeg': m,
+        #                   'kappa': k1,
+        #                   'spreadDeg': 180}
+        phi_parameters = {'domainDeg': (0, 180)}
         phiDomainDeg = (m-90, m+90)
 
         # theta
-        thetaODF = 'vonmises'
-        # thetaDomainDeg = (0, 180)
-        # theta_parameters = {'domainDeg': thetaDomainDeg}
-        theta_parameters = {'muDeg': m,
-                          'kappa': k2,
-                          'spreadDeg': 180}
-        thetaDomainDeg = (m-90, m+90)
+        thetaODF = 'sin'
+        # thetaODF = 'vonmises'
+        thetaDomainDeg = (0, 180)
+        theta_parameters = {'domainDeg': thetaDomainDeg}
+        # theta_parameters = {'muDeg': m,
+        #                   'kappa': k2,
+        #                   'spreadDeg': 180}
+        # thetaDomainDeg = (m-90, m+90)
 
         # Grayscale values
         steel = 90
@@ -283,8 +287,10 @@ for k1 in kappa:
         thetaHistDF.to_csv(path.join(outDir, imgName + '_thetaHist.csv'))
 
         # Orientation Tensor
+        probThetaPhi = np.outer(thetaHist, phiHist)
         Qphi, Aphi = orient_tensor_2D(phiHist, phiBins)  # orientation and anisotropy tensors
         Qtheta, Atheta = orient_tensor_2D(thetaHist, thetaBins)  # orientation and anisotropy tensors
+        Q2, A2 = orient_tensor_3D(probThetaPhi, thetaBins, phiBins)
 
         # General information to text file
         with open(path.join(outDir, txt_fname), 'w+') as f:
@@ -314,5 +320,8 @@ for k1 in kappa:
             f.write("\tODF parameters: {}\n".format(theta_parameters))
             f.write("\tOrientation tensor: {}\n".format(Qtheta.ravel()))
             f.write("\tAnisotropy tensor: {}\n".format(Atheta.ravel()))
+            f.write("Three-dimensional:\n")
+            f.write("\tOrientation tensor: {}\n".format(Q2.ravel()))
+            f.write("\tAnisotropy tensor: {}\n".format(A2.ravel()))
 
 print("Overall time taken: {} s".format(round(time.time() - ostart, 0)))

@@ -20,6 +20,7 @@ from itertools import groupby
 import numpy as np
 from skimage.io import imread
 from fibfourier import fourier_orient_hist
+from odffit import basisfunc_proj
 
 
 dataDir = "../data/art_images"
